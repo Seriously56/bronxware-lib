@@ -36,18 +36,18 @@ local Library = {
     AccentColor = Color3.fromRGB(0, 180, 255);
     SecondaryColor = Color3.fromRGB(120, 80, 255);
     OutlineColor = Color3.fromRGB(40, 40, 50);
-    RiskColor = Color3.fromRGB(255, 80, 80),
-    SuccessColor = Color3.fromRGB(80, 255, 140),
+    RiskColor = Color3.fromRGB(255, 80, 80);
+    SuccessColor = Color3.fromRGB(80, 255, 140);
 
     Black = Color3.new(0, 0, 0);
     White = Color3.new(1, 1, 1);
-    Font = Enum.Font.GothamBold,
+    Font = Enum.Font.GothamBold;
 
     -- Custom properties
-    CornerRadius = UDim.new(0, 6),
-    GlowEnabled = true,
-    AnimationsEnabled = true,
-    BlurBackground = true,
+    CornerRadius = UDim.new(0, 6);
+    GlowEnabled = true;
+    AnimationsEnabled = true;
+    BlurBackground = true;
 
     OpenedFrames = {};
     DependencyBoxes = {};
@@ -121,25 +121,22 @@ function Library:ApplyTextStroke(Inst)
     Inst.TextStrokeTransparency = 0.8
     Inst.TextStrokeColor3 = Color3.new(0, 0, 0)
 
-    local Stroke = Library:Create('UIStroke', {
-        Color = Color3.new(0, 0, 0);
-        Thickness = 2;
-        LineJoinMode = Enum.LineJoinMode.Round;
-        Parent = Inst;
-    });
+    local Stroke = Instance.new('UIStroke')
+    Stroke.Color = Color3.new(0, 0, 0)
+    Stroke.Thickness = 2
+    Stroke.LineJoinMode = Enum.LineJoinMode.Round
+    Stroke.Parent = Inst
+    
+    return Stroke
 end
 
 -- Custom creation with enhanced styling
 function Library:Create(Class, Properties)
-    local _Instance = Class;
-
-    if type(Class) == 'string' then
-        _Instance = Instance.new(Class);
-    end;
+    local _Instance = Instance.new(Class)
 
     for Property, Value in next, Properties do
-        _Instance[Property] = Value;
-    end;
+        _Instance[Property] = Value
+    end
 
     -- Auto-apply corners to frames
     if _Instance:IsA('Frame') or _Instance:IsA('ScrollingFrame') or _Instance:IsA('TextBox') then
@@ -148,8 +145,8 @@ function Library:Create(Class, Properties)
         end
     end
 
-    return _Instance;
-end;
+    return _Instance
+end
 
 -- Enhanced label creation
 function Library:CreateLabel(Properties, IsHud)
@@ -168,7 +165,12 @@ function Library:CreateLabel(Properties, IsHud)
         TextColor3 = 'FontColor';
     }, IsHud);
 
-    return Library:Create(_Instance, Properties);
+    -- Apply additional properties
+    for Property, Value in next, Properties do
+        _Instance[Property] = Value
+    end
+
+    return _Instance
 end;
 
 -- Enhanced draggable with smooth movement
@@ -339,275 +341,172 @@ function Library:OnHighlight(HighlightInstance, Instance, Properties, Properties
     end)
 end;
 
--- Enhanced color picker with better visuals
-local BaseAddons = {};
+-- Add missing essential functions
+function Library:SafeCallback(f, ...)
+    if (not f) then
+        return;
+    end;
 
-do
-    local Funcs = {};
+    if not Library.NotifyOnError then
+        return f(...);
+    end;
 
-    function Funcs:AddColorPicker(Idx, Info)
-        local ToggleLabel = self.TextLabel;
+    local success, event = pcall(f, ...);
 
-        assert(Info.Default, 'AddColorPicker: Missing default value.');
+    if not success then
+        local _, i = event:find(":%d+: ");
 
-        local ColorPicker = {
-            Value = Info.Default;
-            Transparency = Info.Transparency or 0;
-            Type = 'ColorPicker';
-            Title = type(Info.Title) == 'string' and Info.Title or 'Color picker',
-            Callback = Info.Callback or function(Color) end;
-        };
-
-        function ColorPicker:SetHSVFromRGB(Color)
-            local H, S, V = Color3.toHSV(Color);
-
-            ColorPicker.Hue = H;
-            ColorPicker.Sat = S;
-            ColorPicker.Vib = V;
+        if not i then
+            return Library:Notify(event);
         end;
 
-        ColorPicker:SetHSVFromRGB(ColorPicker.Value);
-
-        local DisplayFrame = Library:Create('Frame', {
-            BackgroundColor3 = ColorPicker.Value;
-            BorderColor3 = Library:GetDarkerColor(ColorPicker.Value);
-            BorderSizePixel = 2,
-            Size = UDim2.new(0, 32, 0, 16);
-            ZIndex = 6;
-            Parent = ToggleLabel;
-        });
-
-        Library:ApplyGlow(DisplayFrame, 0.2)
-
-        -- Enhanced transparency display
-        local CheckerFrame = Library:Create('ImageLabel', {
-            BorderSizePixel = 0;
-            Size = UDim2.new(1, 0, 1, 0);
-            ZIndex = 5;
-            Image = 'http://www.roblox.com/asset/?id=12977615774';
-            Visible = not not Info.Transparency;
-            Parent = DisplayFrame;
-        });
-
-        -- Enhanced color picker frame
-        local PickerFrameOuter = Library:Create('Frame', {
-            Name = 'Color';
-            BackgroundColor3 = Library.MainColor,
-            BorderColor3 = Library.AccentColor,
-            BorderSizePixel = 2,
-            Position = UDim2.fromOffset(DisplayFrame.AbsolutePosition.X, DisplayFrame.AbsolutePosition.Y + 18),
-            Size = UDim2.fromOffset(240, Info.Transparency and 285 or 265);
-            Visible = false;
-            ZIndex = 15;
-            Parent = ScreenGui,
-        });
-
-        Library:ApplyGlow(PickerFrameOuter, 0.5)
-
-        -- Rest of the color picker implementation remains similar but with enhanced styling
-        -- [Previous color picker code with enhanced visuals...]
-
-        ColorPicker:Display();
-
-        Options[Idx] = ColorPicker;
-
-        return self;
-    end;
-
-    -- Enhanced keypicker with better visuals
-    function Funcs:AddKeyPicker(Idx, Info)
-        -- [Enhanced keypicker implementation...]
-        -- Similar structure but with improved styling and animations
-    end;
-
-    BaseAddons.__index = Funcs;
-    BaseAddons.__namecall = function(Table, Key, ...)
-        return Funcs[Key](...);
+        return Library:Notify(event:sub(i + 1), 3);
     end;
 end;
 
--- Enhanced groupbox with modern styling
-local BaseGroupbox = {};
-
-do
-    local Funcs = {};
-
-    function Funcs:AddToggle(Idx, Info)
-        assert(Info.Text, 'AddInput: Missing `Text` string.')
-
-        local Toggle = {
-            Value = Info.Default or false;
-            Type = 'Toggle';
-            Callback = Info.Callback or function(Value) end;
-            Addons = {};
-            Risky = Info.Risky,
-        };
-
-        local Groupbox = self;
-        local Container = Groupbox.Container;
-
-        -- Enhanced toggle design
-        local ToggleOuter = Library:Create('Frame', {
-            BackgroundColor3 = Library.BackgroundColor,
-            BorderColor3 = Library.OutlineColor,
-            BorderSizePixel = 2,
-            Size = UDim2.new(0, 40, 0, 20),
-            ZIndex = 5;
-            Parent = Container;
-        });
-
-        Library:ApplyGlow(ToggleOuter, 0.2)
-
-        local ToggleInner = Library:Create('Frame', {
-            BackgroundColor3 = Library.MainColor,
-            BorderSizePixel = 0,
-            Size = UDim2.new(0, 16, 0, 16),
-            Position = UDim2.new(0, 2, 0, 2),
-            ZIndex = 6;
-            Parent = ToggleOuter;
-        });
-
-        local ToggleLabel = Library:CreateLabel({
-            Size = UDim2.new(0, 216, 1, 0);
-            Position = UDim2.new(1, 10, 0, 0);
-            TextSize = 14;
-            Text = Info.Text;
-            TextXAlignment = Enum.TextXAlignment.Left;
-            ZIndex = 6;
-            Parent = ToggleInner;
-        });
-
-        function Toggle:Display()
-            if Library.AnimationsEnabled then
-                local TweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                local ToggleTween = TweenService:Create(ToggleInner, TweenInfo, {
-                    Position = Toggle.Value and UDim2.new(0, 22, 0, 2) or UDim2.new(0, 2, 0, 2),
-                    BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor
-                })
-                ToggleTween:Play()
-            else
-                ToggleInner.Position = Toggle.Value and UDim2.new(0, 22, 0, 2) or UDim2.new(0, 2, 0, 2)
-                ToggleInner.BackgroundColor3 = Toggle.Value and Library.AccentColor or Library.MainColor
-            end
-
-            Library.RegistryMap[ToggleInner].Properties.BackgroundColor3 = Toggle.Value and 'AccentColor' or 'MainColor';
-        end;
-
-        -- Enhanced toggle functionality with animations
-        local ToggleRegion = Library:Create('Frame', {
-            BackgroundTransparency = 1;
-            Size = UDim2.new(1, 50, 1, 0);
-            ZIndex = 8;
-            Parent = ToggleOuter;
-        });
-
-        ToggleRegion.InputBegan:Connect(function(Input)
-            if Input.UserInputType == Enum.UserInputType.MouseButton1 and not Library:MouseIsOverOpenedFrame() then
-                Toggle:SetValue(not Toggle.Value)
-                Library:AttemptSave();
-            end;
-        end);
-
-        Toggle:Display();
-        Groupbox:AddBlank(8);
-        Groupbox:Resize();
-
-        Toggles[Idx] = Toggle;
-        return Toggle;
-    end;
-
-    -- Enhanced slider with modern design
-    function Funcs:AddSlider(Idx, Info)
-        -- [Enhanced slider implementation with better visuals and smooth animations...]
-    end;
-
-    -- Enhanced dropdown with animations
-    function Funcs:AddDropdown(Idx, Info)
-        -- [Enhanced dropdown with smooth animations and better styling...]
-    end;
-
-    BaseGroupbox.__index = Funcs;
-    BaseGroupbox.__namecall = function(Table, Key, ...)
-        return Funcs[Key](...);
+function Library:AttemptSave()
+    if Library.SaveManager then
+        Library.SaveManager:Save();
     end;
 end;
 
--- Enhanced window creation with modern UI
-function Library:CreateWindow(...)
-    local Arguments = { ... }
-    local Config = { AnchorPoint = Vector2.zero }
+function Library:GetTextBounds(Text, Font, Size, Resolution)
+    local Bounds = TextService:GetTextSize(Text, Size, Font, Resolution or Vector2.new(1920, 1080))
+    return Bounds.X, Bounds.Y
+end;
 
-    if type(...) == 'table' then
-        Config = ...;
-    else
-        Config.Title = Arguments[1]
-        Config.AutoShow = Arguments[2] or false;
-    end
+function Library:GetDarkerColor(Color)
+    local H, S, V = Color3.toHSV(Color);
+    return Color3.fromHSV(H, S, V / 1.5);
+end;
 
-    Config.Title = Config.Title or 'Nexus UI'
-    Config.Size = Config.Size or UDim2.fromOffset(600, 650)
+Library.AccentColorDark = Library:GetDarkerColor(Library.AccentColor);
 
-    local Window = {
-        Tabs = {};
+function Library:AddToRegistry(Instance, Properties, IsHud)
+    local Idx = #Library.Registry + 1;
+    local Data = {
+        Instance = Instance;
+        Properties = Properties;
+        Idx = Idx;
     };
 
-    -- Modern window design
-    local Outer = Library:Create('Frame', {
-        AnchorPoint = Config.AnchorPoint,
-        BackgroundColor3 = Library.MainColor,
-        BorderColor3 = Library.AccentColor,
-        BorderSizePixel = 2,
-        Position = Config.Position or UDim2.fromOffset(100, 50),
-        Size = Config.Size,
-        Visible = false;
-        ZIndex = 1;
+    table.insert(Library.Registry, Data);
+    Library.RegistryMap[Instance] = Data;
+
+    if IsHud then
+        table.insert(Library.HudRegistry, Data);
+    end;
+end;
+
+function Library:RemoveFromRegistry(Instance)
+    local Data = Library.RegistryMap[Instance];
+
+    if Data then
+        for Idx = #Library.Registry, 1, -1 do
+            if Library.Registry[Idx] == Data then
+                table.remove(Library.Registry, Idx);
+            end;
+        end;
+
+        for Idx = #Library.HudRegistry, 1, -1 do
+            if Library.HudRegistry[Idx] == Data then
+                table.remove(Library.HudRegistry, Idx);
+            end;
+        end;
+
+        Library.RegistryMap[Instance] = nil;
+    end;
+end;
+
+function Library:UpdateColorsUsingRegistry()
+    for Idx, Object in next, Library.Registry do
+        for Property, ColorIdx in next, Object.Properties do
+            if type(ColorIdx) == 'string' then
+                Object.Instance[Property] = Library[ColorIdx];
+            elseif type(ColorIdx) == 'function' then
+                Object.Instance[Property] = ColorIdx()
+            end
+        end;
+    end;
+end;
+
+function Library:GiveSignal(Signal)
+    table.insert(Library.Signals, Signal)
+end
+
+function Library:MouseIsOverOpenedFrame()
+    for Frame, _ in next, Library.OpenedFrames do
+        local AbsPos, AbsSize = Frame.AbsolutePosition, Frame.AbsoluteSize;
+
+        if Mouse.X >= AbsPos.X and Mouse.X <= AbsPos.X + AbsSize.X
+            and Mouse.Y >= AbsPos.Y and Mouse.Y <= AbsPos.Y + AbsSize.Y then
+
+            return true;
+        end;
+    end;
+end;
+
+function Library:IsMouseOverFrame(Frame)
+    local AbsPos, AbsSize = Frame.AbsolutePosition, Frame.AbsoluteSize;
+
+    if Mouse.X >= AbsPos.X and Mouse.X <= AbsPos.X + AbsSize.X
+        and Mouse.Y >= AbsPos.Y and Mouse.Y <= AbsPos.Y + AbsSize.Y then
+
+        return true;
+    end;
+end;
+
+-- Create essential UI elements
+do
+    Library.NotificationArea = Library:Create('Frame', {
+        BackgroundTransparency = 1;
+        Position = UDim2.new(0, 0, 0, 40);
+        Size = UDim2.new(0, 300, 0, 200);
+        ZIndex = 100;
         Parent = ScreenGui;
     });
 
-    Library:ApplyGlow(Outer, 0.6)
-    Library:MakeDraggable(Outer, 35);
-
-    -- Enhanced header
-    local Header = Library:Create('Frame', {
-        BackgroundColor3 = Library.AccentColor,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 35),
-        ZIndex = 2;
-        Parent = Outer;
+    Library:Create('UIListLayout', {
+        Padding = UDim.new(0, 4);
+        FillDirection = Enum.FillDirection.Vertical;
+        SortOrder = Enum.SortOrder.LayoutOrder;
+        Parent = Library.NotificationArea;
     });
 
-    local WindowLabel = Library:CreateLabel({
-        Position = UDim2.new(0, 15, 0, 0);
-        Size = UDim2.new(0, 0, 1, 0);
-        Text = Config.Title or 'Nexus UI';
-        TextColor3 = Library.White,
+    local WatermarkOuter = Library:Create('Frame', {
+        BorderColor3 = Color3.new(0, 0, 0);
+        Position = UDim2.new(0, 100, 0, -25);
+        Size = UDim2.new(0, 213, 0, 20);
+        ZIndex = 200;
+        Visible = false;
+        Parent = ScreenGui;
+    });
+
+    local WatermarkInner = Library:Create('Frame', {
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3 = Library.AccentColor;
+        BorderMode = Enum.BorderMode.Inset;
+        Size = UDim2.new(1, 0, 1, 0);
+        ZIndex = 201;
+        Parent = WatermarkOuter;
+    });
+
+    Library:AddToRegistry(WatermarkInner, {
+        BorderColor3 = 'AccentColor';
+    });
+
+    local WatermarkLabel = Library:CreateLabel({
+        Position = UDim2.new(0, 5, 0, 0);
+        Size = UDim2.new(1, -4, 1, 0);
+        TextSize = 14;
         TextXAlignment = Enum.TextXAlignment.Left;
-        ZIndex = 3;
-        Parent = Header;
+        ZIndex = 203;
+        Parent = WatermarkInner;
     });
 
-    -- Modern tab system
-    local TabArea = Library:Create('Frame', {
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 0, 0, 35),
-        Size = UDim2.new(1, 0, 0, 40),
-        ZIndex = 2;
-        Parent = Outer;
-    });
-
-    -- Enhanced content area
-    local ContentArea = Library:Create('Frame', {
-        BackgroundColor3 = Library.BackgroundColor,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 75),
-        Size = UDim2.new(1, 0, 1, -75),
-        ZIndex = 1;
-        Parent = Outer;
-    });
-
-    -- [Rest of window implementation with enhanced visuals...]
-
-    return Window;
+    Library.Watermark = WatermarkOuter;
+    Library.WatermarkText = WatermarkLabel;
+    Library:MakeDraggable(Library.Watermark);
 end;
 
 -- Enhanced notifications with modern design
@@ -625,7 +524,7 @@ function Library:Notify(Text, Time)
         Size = UDim2.new(0, 0, 0, YSize),
         AnchorPoint = Vector2.new(1, 0),
         ClipsDescendants = true,
-        ZIndex = 100;
+        ZIndex = 100,
         Parent = Library.NotificationArea;
     });
 
@@ -694,6 +593,71 @@ function Library:SetWatermark(Text)
     end
 end;
 
+function Library:SetWatermarkVisibility(Bool)
+    Library.Watermark.Visible = Bool;
+end;
+
+-- Enhanced window creation with modern UI
+function Library:CreateWindow(Config)
+    Config = Config or {}
+    Config.Title = Config.Title or 'Nexus UI'
+    Config.Size = Config.Size or UDim2.fromOffset(600, 650)
+    Config.Position = Config.Position or UDim2.fromOffset(100, 50)
+
+    local Window = {
+        Tabs = {};
+    };
+
+    -- Modern window design
+    local Outer = Library:Create('Frame', {
+        AnchorPoint = Config.AnchorPoint or Vector2.zero,
+        BackgroundColor3 = Library.MainColor,
+        BorderColor3 = Library.AccentColor,
+        BorderSizePixel = 2,
+        Position = Config.Position,
+        Size = Config.Size,
+        Visible = false,
+        ZIndex = 1,
+        Parent = ScreenGui,
+    });
+
+    Library:ApplyGlow(Outer, 0.6)
+    Library:MakeDraggable(Outer, 35);
+
+    -- Enhanced header
+    local Header = Library:Create('Frame', {
+        BackgroundColor3 = Library.AccentColor,
+        BorderSizePixel = 0,
+        Size = UDim2.new(1, 0, 0, 35),
+        ZIndex = 2,
+        Parent = Outer,
+    });
+
+    local WindowLabel = Library:CreateLabel({
+        Position = UDim2.new(0, 15, 0, 0),
+        Size = UDim2.new(0, 0, 1, 0),
+        Text = Config.Title,
+        TextColor3 = Library.White,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ZIndex = 3,
+        Parent = Header,
+    });
+
+    -- Return basic window structure for now
+    -- Full implementation would continue with tabs, etc.
+
+    function Window:Show()
+        Outer.Visible = true
+    end
+
+    function Window:Hide()
+        Outer.Visible = false
+    end
+
+    Window.Holder = Outer
+    return Window
+end
+
 -- New feature: Theme system
 Library.Themes = {
     Dark = {
@@ -724,36 +688,6 @@ function Library:SetTheme(ThemeName)
         end
         Library:UpdateColorsUsingRegistry()
     end
-end
-
--- New feature: Configuration saver
-function Library:SaveConfig(Name)
-    local Config = {
-        Toggles = {},
-        Options = {}
-    }
-    
-    for Name, Toggle in next, Toggles do
-        Config.Toggles[Name] = Toggle.Value
-    end
-    
-    for Name, Option in next, Options do
-        if Option.Type == 'ColorPicker' then
-            Config.Options[Name] = {Option.Value, Option.Transparency}
-        elseif Option.Type == 'KeyPicker' then
-            Config.Options[Name] = {Option.Value, Option.Mode}
-        else
-            Config.Options[Name] = Option.Value
-        end
-    end
-    
-    -- Save to file or datastore
-    print("Config saved:", Name)
-end
-
-function Library:LoadConfig(Name)
-    -- Load configuration logic
-    print("Config loaded:", Name)
 end
 
 getgenv().Library = Library
