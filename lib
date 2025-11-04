@@ -1,3 +1,35 @@
+-- Initialize library object
+local library = {
+    flags = {},
+    config_flags = {},
+    notifications = {notifs = {}},
+    connections = {},
+    folders = {"/configs"},
+    directory = "nebula",
+    cache = {},
+    priority = {},
+    whitelist = {},
+    current_open = nil
+}
+
+library.__index = library
+
+-- Platform detection
+local Mobile = game:GetService("UserInputService").TouchEnabled
+local function gethui()
+    return (syn and syn.protect_gui) and syn.protect_gui or function(obj) 
+        if gethui then
+            return gethui(obj)
+        end
+        return obj
+    end
+end
+
+local function GetImage(path)
+    -- Add your image loading logic here
+    return "rbxassetid://111862698467575" -- placeholder
+end
+
 local Services = {
     UserInputService = game:GetService("UserInputService"),
     Players = game:GetService("Players"),
