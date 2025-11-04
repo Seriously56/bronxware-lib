@@ -1,3 +1,21 @@
+local Services = {
+    UserInputService = game:GetService("UserInputService"),
+    Players = game:GetService("Players"),
+    Workspace = game:GetService("Workspace"),
+    ReplicatedStorage = game:GetService("ReplicatedStorage"),
+    HttpService = game:GetService("HttpService"),
+    GuiService = game:GetService("GuiService"),
+    Lighting = game:GetService("Lighting"),
+    RunService = game:GetService("RunService"),
+    Stats = game:GetService("Stats"),
+    CoreGui = game:GetService("CoreGui"),
+    Debris = game:GetService("Debris"),
+    TweenService = game:GetService("TweenService"),
+    SoundService = game:GetService("SoundService"),
+    TeleportService = game:GetService("TeleportService") -- You're also using this in the config section
+}
+
+
 if LPH_OBFUSCATED == nil then
     local assert = assert
     local type = type
