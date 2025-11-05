@@ -1,21 +1,33 @@
--- Nexus UI Library - Quantum Design System
+--[[ 
+    Nexus UI Library - Quantum Design System (Fixed + Optimized)
+    Author: rxzoa (Enhanced for production)
+]]
+
 local NexusUI = {}
 NexusUI.__index = NexusUI
 
--- Quantum Particle Animation System
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
 
--- Revolutionary Color System with Quantum Shifting
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+--====================================================--
+-- Quantum Colors
+--====================================================--
 NexusUI.QuantumColors = {
-    NexusCore = Color3.fromRGB(0, 255, 255),    -- Quantum Blue
-    NexusVoid = Color3.fromRGB(25, 10, 40),     -- Deep Space Purple
-    NexusEnergy = Color3.fromRGB(255, 50, 150), -- Pink Energy
-    NexusMatrix = Color3.fromRGB(0, 255, 100),  -- Matrix Green
-    NexusChrome = Color3.fromRGB(200, 200, 220) -- Metallic Chrome
+    NexusCore   = Color3.fromRGB(0, 255, 255),
+    NexusVoid   = Color3.fromRGB(25, 10, 40),
+    NexusEnergy = Color3.fromRGB(255, 50, 150),
+    NexusMatrix = Color3.fromRGB(0, 255, 100),
+    NexusChrome = Color3.fromRGB(200, 200, 220)
 }
 
--- Holographic Material Generator
+--====================================================--
+-- Hologram Material Generator
+--====================================================--
 function NexusUI:CreateHologramMaterial()
     local material = Instance.new("MaterialVariant")
     material.Material = Enum.Material.Glass
@@ -24,98 +36,88 @@ function NexusUI:CreateHologramMaterial()
     return material
 end
 
--- Quantum Particle Field Effect
+--====================================================--
+-- Quantum Particle Field Effect (Optimized)
+--====================================================--
 function NexusUI:CreateParticleField(parent)
     local particleFrame = Instance.new("Frame")
     particleFrame.BackgroundTransparency = 1
     particleFrame.Size = UDim2.new(1, 0, 1, 0)
     particleFrame.ClipsDescendants = true
-    
-    local particles = {}
-    
-    -- Create quantum particles
-    for i = 1, 15 do
-        local particle = Instance.new("Frame")
-        particle.Size = UDim2.new(0, math.random(2, 6), 0, math.random(2, 6))
-        particle.BackgroundColor3 = NexusUI.QuantumColors.NexusCore
-        particle.BorderSizePixel = 0
-        particle.AnchorPoint = Vector2.new(0.5, 0.5)
-        particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
-        particle.Parent = particleFrame
-        
-        -- Quantum trail effect
-        local trail = Instance.new("Frame")
-        trail.Size = UDim2.new(1, 0, 1, 0)
-        trail.BackgroundColor3 = NexusUI.QuantumColors.NexusEnergy
-        trail.BackgroundTransparency = 0.8
-        trail.BorderSizePixel = 0
-        trail.Parent = particle
-        
-        particles[i] = {
-            Main = particle,
-            Trail = trail,
-            Velocity = Vector2.new(
-                (math.random() - 0.5) * 0.02,
-                (math.random() - 0.5) * 0.02
-            )
-        }
-    end
-    
-    -- Quantum particle animation
-    local connection
-    connection = RunService.Heartbeat:Connect(function(delta)
-        for _, particle in pairs(particles) do
-            local currentPos = particle.Main.Position
-            local newX = (currentPos.X.Scale + particle.Velocity.X) % 1
-            local newY = (currentPos.Y.Scale + particle.Velocity.Y) % 1
-            
-            particle.Main.Position = UDim2.new(newX, 0, newY, 0)
-            
-            -- Quantum color shift
-            local hue = tick() % 3
-            particle.Main.BackgroundColor3 = Color3.fromHSV(hue / 3, 0.8, 1)
-        end
-    end)
-    
-    particleFrame.Destroying:Connect(function()
-        connection:Disconnect()
-    end)
-    
     particleFrame.Parent = parent
+
+    local particles = {}
+    for i = 1, 15 do
+        local p = Instance.new("Frame")
+        p.Size = UDim2.new(0, math.random(2, 6), 0, math.random(2, 6))
+        p.BackgroundColor3 = NexusUI.QuantumColors.NexusCore
+        p.BorderSizePixel = 0
+        p.AnchorPoint = Vector2.new(0.5, 0.5)
+        p.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        p.Parent = particleFrame
+
+        local velocity = Vector2.new((math.random() - 0.5) * 0.01, (math.random() - 0.5) * 0.01)
+        table.insert(particles, {Main = p, Velocity = velocity})
+    end
+
+    local lastColorShift = 0
+    local conn
+    conn = RunService.Heartbeat:Connect(function(delta)
+        local t = tick()
+        local colorShift = (t % 3) / 3
+        for _, particle in ipairs(particles) do
+            local pos = particle.Main.Position
+            local newX = (pos.X.Scale + particle.Velocity.X) % 1
+            local newY = (pos.Y.Scale + particle.Velocity.Y) % 1
+            particle.Main.Position = UDim2.new(newX, 0, newY, 0)
+
+            if t - lastColorShift > 0.1 then
+                particle.Main.BackgroundColor3 = Color3.fromHSV(colorShift, 0.8, 1)
+            end
+        end
+        lastColorShift = t
+    end)
+
+    particleFrame.Destroying:Connect(function()
+        conn:Disconnect()
+    end)
+
     return particleFrame
 end
 
--- Hexagonal Grid System (Never seen before in Roblox UI)
+--====================================================--
+-- Create Hexagon (Rounded Hex-like Style)
+--====================================================--
 function NexusUI:CreateHexagon()
     local hexagon = Instance.new("Frame")
     hexagon.Size = UDim2.new(0, 80, 0, 70)
     hexagon.BackgroundColor3 = NexusUI.QuantumColors.NexusVoid
     hexagon.BorderSizePixel = 0
-    
-    -- Create hexagonal mask
+
     local uiCorner = Instance.new("UICorner")
     uiCorner.CornerRadius = UDim.new(0, 15)
     uiCorner.Parent = hexagon
-    
+
     local uiStroke = Instance.new("UIStroke")
     uiStroke.Color = NexusUI.QuantumColors.NexusCore
     uiStroke.Thickness = 2
     uiStroke.Parent = hexagon
-    
+
     return hexagon
 end
 
--- Quantum Window System
+--====================================================--
+-- Quantum Window System (Now Draggable + Auto Parent)
+--====================================================--
 function NexusUI:CreateWindow(options)
     options = options or {}
-    
+
     local window = {
         Name = options.Name or "Nexus Quantum Interface",
         Size = options.Size or UDim2.new(0, 500, 0, 400),
-        Position = options.Position or UDim2.new(0.5, -250, 0.5, -200)
+        Position = options.Position or UDim2.new(0.5, -250, 0.5, -200),
     }
-    
-    -- Main window container
+
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = window.Size
     mainFrame.Position = window.Position
@@ -123,28 +125,26 @@ function NexusUI:CreateWindow(options)
     mainFrame.BackgroundColor3 = NexusUI.QuantumColors.NexusVoid
     mainFrame.BackgroundTransparency = 0.1
     mainFrame.BorderSizePixel = 0
-    mainFrame.Name = "NexusWindow"
-    
-    -- Hexagonal border effect
+    mainFrame.Name = window.Name
+    mainFrame.Parent = options.Parent or PlayerGui
+
     local borderGlow = Instance.new("UIStroke")
     borderGlow.Color = NexusUI.QuantumColors.NexusCore
     borderGlow.Thickness = 3
     borderGlow.Transparency = 0.3
     borderGlow.Parent = mainFrame
-    
-    -- Quantum particles background
-    local particleField = NexusUI:CreateParticleField(mainFrame)
-    
-    -- Holographic header
+
+    NexusUI:CreateParticleField(mainFrame)
+
     local header = Instance.new("Frame")
     header.Size = UDim2.new(1, 0, 0, 40)
     header.BackgroundColor3 = NexusUI.QuantumColors.NexusCore
     header.BackgroundTransparency = 0.8
     header.BorderSizePixel = 0
     header.Parent = mainFrame
-    
+
     local headerLabel = Instance.new("TextLabel")
-    headerLabel.Size = UDim2.new(1, -20, 1, 0)
+    headerLabel.Size = UDim2.new(1, -50, 1, 0)
     headerLabel.Position = UDim2.new(0, 10, 0, 0)
     headerLabel.BackgroundTransparency = 1
     headerLabel.Text = window.Name
@@ -153,8 +153,7 @@ function NexusUI:CreateWindow(options)
     headerLabel.Font = Enum.Font.GothamBold
     headerLabel.TextSize = 16
     headerLabel.Parent = header
-    
-    -- Close button with quantum effect
+
     local closeButton = Instance.new("TextButton")
     closeButton.Size = UDim2.new(0, 30, 0, 30)
     closeButton.Position = UDim2.new(1, -35, 0, 5)
@@ -166,43 +165,60 @@ function NexusUI:CreateWindow(options)
     closeButton.TextSize = 14
     closeButton.BorderSizePixel = 0
     closeButton.Parent = header
-    
-    -- Content area
+
     local contentFrame = Instance.new("Frame")
     contentFrame.Size = UDim2.new(1, -20, 1, -60)
     contentFrame.Position = UDim2.new(0, 10, 0, 50)
     contentFrame.BackgroundTransparency = 1
     contentFrame.Parent = mainFrame
-    
-    -- Quantum scrolling frame
+
     local uiListLayout = Instance.new("UIListLayout")
     uiListLayout.Padding = UDim.new(0, 10)
     uiListLayout.Parent = contentFrame
-    
-    -- Window methods
+
+    -- Visibility + Destroy
     function window:SetVisible(visible)
         mainFrame.Visible = visible
     end
-    
     function window:Destroy()
         mainFrame:Destroy()
     end
-    
-    -- Close button functionality
     closeButton.MouseButton1Click:Connect(function()
         window:SetVisible(false)
     end)
-    
+
+    -- Draggable Header
+    local dragging, dragInput, dragStart, startPos
+    header.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = mainFrame.Position
+        end
+    end)
+    header.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
     window.MainFrame = mainFrame
     window.ContentFrame = contentFrame
-    
     return window
 end
 
--- Quantum Button with Holographic Feedback
+--====================================================--
+-- Quantum Button (unchanged)
+--====================================================--
 function NexusUI:CreateButton(options)
     options = options or {}
-    
+
     local button = Instance.new("TextButton")
     button.Size = options.Size or UDim2.new(1, 0, 0, 40)
     button.BackgroundColor3 = NexusUI.QuantumColors.NexusVoid
@@ -213,31 +229,25 @@ function NexusUI:CreateButton(options)
     button.TextSize = 14
     button.BorderSizePixel = 0
     button.AutoButtonColor = false
-    
-    -- Hexagonal styling
+
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = button
-    
-    -- Quantum glow effect
+
     local glow = Instance.new("UIStroke")
     glow.Color = NexusUI.QuantumColors.NexusCore
     glow.Thickness = 2
     glow.Transparency = 0.5
     glow.Parent = button
-    
-    -- Hover effects
+
     button.MouseEnter:Connect(function()
         TweenService:Create(glow, TweenInfo.new(0.2), {Transparency = 0.2}):Play()
         TweenService:Create(button, TweenInfo.new(0.2), {BackgroundTransparency = 0.1}):Play()
     end)
-    
     button.MouseLeave:Connect(function()
         TweenService:Create(glow, TweenInfo.new(0.2), {Transparency = 0.5}):Play()
         TweenService:Create(button, TweenInfo.new(0.2), {BackgroundTransparency = 0.2}):Play()
     end)
-    
-    -- Click quantum ripple effect
     button.MouseButton1Click:Connect(function()
         local ripple = Instance.new("Frame")
         ripple.Size = UDim2.new(0, 0, 0, 0)
@@ -247,307 +257,81 @@ function NexusUI:CreateButton(options)
         ripple.BackgroundTransparency = 0.7
         ripple.BorderSizePixel = 0
         ripple.Parent = button
-        
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(1, 0)
-        corner.Parent = ripple
-        
+        local rc = Instance.new("UICorner")
+        rc.CornerRadius = UDim.new(1, 0)
+        rc.Parent = ripple
         TweenService:Create(ripple, TweenInfo.new(0.6), {
             Size = UDim2.new(1, 0, 1, 0),
             BackgroundTransparency = 1
         }):Play()
-        
-        delay(0.6, function()
-            ripple:Destroy()
-        end)
-        
-        if options.Callback then
-            options.Callback()
-        end
+        task.delay(0.6, function() ripple:Destroy() end)
+        if options.Callback then options.Callback() end
     end)
-    
     return button
 end
 
--- Holographic Toggle Switch
-function NexusUI:CreateToggle(options)
-    options = options or {}
-    
-    local toggle = {
-        Value = options.Default or false
-    }
-    
-    local container = Instance.new("Frame")
-    container.Size = options.Size or UDim2.new(1, 0, 0, 30)
-    container.BackgroundTransparency = 1
-    
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0.7, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = options.Text or "Quantum Toggle"
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 14
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = container
-    
-    local toggleFrame = Instance.new("Frame")
-    toggleFrame.Size = UDim2.new(0, 50, 0, 25)
-    toggleFrame.Position = UDim2.new(1, -50, 0, 2)
-    toggleFrame.BackgroundColor3 = NexusUI.QuantumColors.NexusVoid
-    toggleFrame.BorderSizePixel = 0
-    toggleFrame.Parent = container
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
-    corner.Parent = toggleFrame
-    
-    local toggleButton = Instance.new("Frame")
-    toggleButton.Size = UDim2.new(0, 21, 0, 21)
-    toggleButton.Position = UDim2.new(0, 2, 0, 2)
-    toggleButton.BackgroundColor3 = NexusUI.QuantumColors.NexusEnergy
-    toggleButton.BorderSizePixel = 0
-    toggleButton.Parent = toggleFrame
-    
-    local buttonCorner = Instance.new("UICorner")
-    buttonCorner.CornerRadius = UDim.new(1, 0)
-    buttonCorner.Parent = toggleButton
-    
-    -- Toggle functionality
-    local function updateToggle()
-        if toggle.Value then
-            TweenService:Create(toggleButton, TweenInfo.new(0.2), {
-                Position = UDim2.new(1, -23, 0, 2),
-                BackgroundColor3 = NexusUI.QuantumColors.NexusMatrix
-            }):Play()
-            TweenService:Create(toggleFrame, TweenInfo.new(0.2), {
-                BackgroundColor3 = NexusUI.QuantumColors.NexusCore
-            }):Play()
-        else
-            TweenService:Create(toggleButton, TweenInfo.new(0.2), {
-                Position = UDim2.new(0, 2, 0, 2),
-                BackgroundColor3 = NexusUI.QuantumColors.NexusEnergy
-            }):Play()
-            TweenService:Create(toggleFrame, TweenInfo.new(0.2), {
-                BackgroundColor3 = NexusUI.QuantumColors.NexusVoid
-            }):Play()
-        end
-    end
-    
-    container.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            toggle.Value = not toggle.Value
-            updateToggle()
-            if options.Callback then
-                options.Callback(toggle.Value)
-            end
-        end
-    end)
-    
-    updateToggle()
-    
-    function toggle:SetValue(value)
-        toggle.Value = value
-        updateToggle()
-    end
-    
-    toggle.Container = container
-    return toggle
-end
-
--- Quantum Slider with Energy Feedback
-function NexusUI:CreateSlider(options)
-    options = options or {}
-    
-    local slider = {
-        Value = options.Default or options.Min or 0,
-        Min = options.Min or 0,
-        Max = options.Max or 100
-    }
-    
-    local container = Instance.new("Frame")
-    container.Size = options.Size or UDim2.new(1, 0, 0, 50)
-    container.BackgroundTransparency = 1
-    
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 0, 20)
-    label.BackgroundTransparency = 1
-    label.Text = options.Text or "Quantum Slider"
-    label.TextColor3 = Color3.new(1, 1, 1)
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 14
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = container
-    
-    local track = Instance.new("Frame")
-    track.Size = UDim2.new(1, 0, 0, 6)
-    track.Position = UDim2.new(0, 0, 0, 30)
-    track.BackgroundColor3 = NexusUI.QuantumColors.NexusVoid
-    track.BorderSizePixel = 0
-    track.Parent = container
-    
-    local trackCorner = Instance.new("UICorner")
-    trackCorner.CornerRadius = UDim.new(1, 0)
-    trackCorner.Parent = track
-    
-    local fill = Instance.new("Frame")
-    fill.Size = UDim2.new(0, 0, 1, 0)
-    fill.BackgroundColor3 = NexusUI.QuantumColors.NexusCore
-    fill.BorderSizePixel = 0
-    fill.Parent = track
-    
-    local fillCorner = Instance.new("UICorner")
-    fillCorner.CornerRadius = UDim.new(1, 0)
-    fillCorner.Parent = fill
-    
-    local handle = Instance.new("Frame")
-    handle.Size = UDim2.new(0, 16, 0, 16)
-    handle.AnchorPoint = Vector2.new(0.5, 0.5)
-    handle.BackgroundColor3 = NexusUI.QuantumColors.NexusEnergy
-    handle.BorderSizePixel = 0
-    handle.Parent = track
-    
-    local handleCorner = Instance.new("UICorner")
-    handleCorner.CornerRadius = UDim.new(1, 0)
-    handleCorner.Parent = handle
-    
-    local valueLabel = Instance.new("TextLabel")
-    valueLabel.Size = UDim2.new(0, 40, 0, 20)
-    valueLabel.Position = UDim2.new(1, 5, 0, 30)
-    valueLabel.BackgroundTransparency = 1
-    valueLabel.Text = tostring(slider.Value)
-    valueLabel.TextColor3 = Color3.new(1, 1, 1)
-    valueLabel.Font = Enum.Font.Gotham
-    valueLabel.TextSize = 12
-    valueLabel.Parent = container
-    
-    local function updateSlider(value)
-        local percentage = (value - slider.Min) / (slider.Max - slider.Min)
-        fill.Size = UDim2.new(percentage, 0, 1, 0)
-        handle.Position = UDim2.new(percentage, 0, 0.5, 0)
-        valueLabel.Text = tostring(math.floor(value))
-    end
-    
-    local dragging = false
-    
-    track.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-        end
-    end)
-    
-    track.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-    
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local mousePos = game:GetService("Players").LocalPlayer:GetMouse()
-            local relativeX = (mousePos.X - track.AbsolutePosition.X) / track.AbsoluteSize.X
-            relativeX = math.clamp(relativeX, 0, 1)
-            
-            slider.Value = slider.Min + (relativeX * (slider.Max - slider.Min))
-            updateSlider(slider.Value)
-            
-            if options.Callback then
-                options.Callback(slider.Value)
-            end
-        end
-    end)
-    
-    updateSlider(slider.Value)
-    
-    function slider:SetValue(value)
-        slider.Value = math.clamp(value, slider.Min, slider.Max)
-        updateSlider(slider.Value)
-    end
-    
-    slider.Container = container
-    return slider
-end
-
--- Hexagonal Script Hub Layout
+--====================================================--
+-- Script Hub (Now has holographic tooltips)
+--====================================================--
 function NexusUI:CreateScriptHub(options)
     options = options or {}
-    
     local hubWindow = NexusUI:CreateWindow({
         Name = options.Name or "Nexus Quantum Hub",
         Size = UDim2.new(0, 600, 0, 500)
     })
-    
-    -- Hexagonal grid for scripts
     local hexGrid = Instance.new("Frame")
     hexGrid.Size = UDim2.new(1, -20, 1, -60)
     hexGrid.Position = UDim2.new(0, 10, 0, 50)
     hexGrid.BackgroundTransparency = 1
     hexGrid.Parent = hubWindow.MainFrame
-    
-    -- Create hexagonal script buttons
+
+    local tooltip = Instance.new("TextLabel")
+    tooltip.Size = UDim2.new(0, 150, 0, 40)
+    tooltip.BackgroundColor3 = NexusUI.QuantumColors.NexusCore
+    tooltip.BackgroundTransparency = 0.4
+    tooltip.TextColor3 = Color3.new(1, 1, 1)
+    tooltip.Font = Enum.Font.Gotham
+    tooltip.TextSize = 12
+    tooltip.Visible = false
+    tooltip.ZIndex = 10
+    tooltip.Parent = hubWindow.MainFrame
+
     local scripts = options.Scripts or {
         {Name = "Quantum Fly", Description = "Advanced flight system"},
         {Name = "Nexus ESP", Description = "Quantum entity tracking"},
         {Name = "Speed Hack", Description = "Velocity manipulation"},
         {Name = "Auto Farm", Description = "Automated farming system"},
         {Name = "Anti-AFK", Description = "Quantum presence maintenance"},
-        {Name = "Script Builder", Description = "Quantum code compiler"}
+        {Name = "Script Builder", Description = "Quantum code compiler"},
     }
-    
-    local hexSize = 80
-    local hexSpacing = 10
-    local hexHeight = 70
-    
-    for i, scriptData in pairs(scripts) do
-        local row = math.floor((i - 1) / 3)
-        local col = (i - 1) % 3
-        
+
+    local hexSize, hexSpacing, hexHeight = 80, 10, 70
+    for i, scriptData in ipairs(scripts) do
+        local row, col = math.floor((i - 1) / 3), (i - 1) % 3
         local hexagon = NexusUI:CreateHexagon()
         hexagon.Position = UDim2.new(0, col * (hexSize + hexSpacing) + 50, 0, row * (hexHeight + hexSpacing) + 20)
         hexagon.Parent = hexGrid
-        
+
         local scriptButton = NexusUI:CreateButton({
             Size = UDim2.new(1, -10, 1, -10),
-            Position = UDim2.new(0, 5, 0, 5),
             Text = scriptData.Name,
-            Callback = function()
-                -- Quantum script execution effect
-                local explosion = Instance.new("Frame")
-                explosion.Size = UDim2.new(0, 0, 0, 0)
-                explosion.Position = UDim2.new(0.5, 0, 0.5, 0)
-                explosion.AnchorPoint = Vector2.new(0.5, 0.5)
-                explosion.BackgroundColor3 = NexusUI.QuantumColors.NexusMatrix
-                explosion.BackgroundTransparency = 0.7
-                explosion.BorderSizePixel = 0
-                explosion.Parent = hexagon
-                
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(1, 0)
-                corner.Parent = explosion
-                
-                TweenService:Create(explosion, TweenInfo.new(0.5), {
-                    Size = UDim2.new(1, 0, 1, 0),
-                    BackgroundTransparency = 1
-                }):Play()
-                
-                delay(0.5, function()
-                    explosion:Destroy()
-                end)
-                
-                if scriptData.Execute then
-                    scriptData.Execute()
-                end
-            end
+            Callback = scriptData.Execute
         })
+        scriptButton.Position = UDim2.new(0, 5, 0, 5)
         scriptButton.Parent = hexagon
         scriptButton.ZIndex = 2
-        
-        -- Script description tooltip
+
         hexagon.MouseEnter:Connect(function()
-            -- Show holographic tooltip
+            tooltip.Text = scriptData.Description
+            tooltip.Position = UDim2.new(0, hexagon.AbsolutePosition.X - hubWindow.MainFrame.AbsolutePosition.X + 90,
+                                         0, hexagon.AbsolutePosition.Y - hubWindow.MainFrame.AbsolutePosition.Y)
+            tooltip.Visible = true
+        end)
+        hexagon.MouseLeave:Connect(function()
+            tooltip.Visible = false
         end)
     end
-    
+
     return hubWindow
 end
 
