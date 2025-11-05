@@ -1,338 +1,386 @@
---[[ 
-    Nexus UI Library - Quantum Design System (Fixed + Optimized)
-    Author: rxzoa (Enhanced for production)
-]]
-
+-- NexusUI Part 1/3: Core setup
 local NexusUI = {}
 NexusUI.__index = NexusUI
 
+-- Services
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
 
+-- Player
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
---====================================================--
--- Quantum Colors
---====================================================--
-NexusUI.QuantumColors = {
-    NexusCore   = Color3.fromRGB(0, 255, 255),
-    NexusVoid   = Color3.fromRGB(25, 10, 40),
-    NexusEnergy = Color3.fromRGB(255, 50, 150),
-    NexusMatrix = Color3.fromRGB(0, 255, 100),
-    NexusChrome = Color3.fromRGB(200, 200, 220)
+-- Main container
+local UI = Instance.new("ScreenGui")
+UI.Name = "NexusUI"
+UI.ResetOnSpawn = false
+UI.Parent = CoreGui
+
+-- Theme defaults
+local Theme = {
+    Primary = Color3.fromRGB(0, 170, 255),
+    Secondary = Color3.fromRGB(35, 35, 35),
+    Accent = Color3.fromRGB(0, 120, 255),
+    Background = Color3.fromRGB(25, 25, 25),
+    TextColor = Color3.fromRGB(255, 255, 255)
 }
 
---====================================================--
--- Hologram Material Generator
---====================================================--
-function NexusUI:CreateHologramMaterial()
-    local material = Instance.new("MaterialVariant")
-    material.Material = Enum.Material.Glass
-    material.Transparency = 0.7
-    material.Reflectance = 0.3
-    return material
+-- Utility functions
+local function Tween(obj, properties, time, style, direction)
+    style = style or Enum.EasingStyle.Quad
+    direction = direction or Enum.EasingDirection.Out
+    local tween = TweenService:Create(obj, TweenInfo.new(time, style, direction), properties)
+    tween:Play()
+    return tween
 end
 
---====================================================--
--- Quantum Particle Field Effect (Optimized)
---====================================================--
-function NexusUI:CreateParticleField(parent)
-    local particleFrame = Instance.new("Frame")
-    particleFrame.BackgroundTransparency = 1
-    particleFrame.Size = UDim2.new(1, 0, 1, 0)
-    particleFrame.ClipsDescendants = true
-    particleFrame.Parent = parent
+-- Draggable frames
+local function MakeDraggable(frame)
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
 
-    local particles = {}
-    for i = 1, 15 do
-        local p = Instance.new("Frame")
-        p.Size = UDim2.new(0, math.random(2, 6), 0, math.random(2, 6))
-        p.BackgroundColor3 = NexusUI.QuantumColors.NexusCore
-        p.BorderSizePixel = 0
-        p.AnchorPoint = Vector2.new(0.5, 0.5)
-        p.Position = UDim2.new(math.random(), 0, math.random(), 0)
-        p.Parent = particleFrame
-
-        local velocity = Vector2.new((math.random() - 0.5) * 0.01, (math.random() - 0.5) * 0.01)
-        table.insert(particles, {Main = p, Velocity = velocity})
+    local function update(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                                   startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 
-    local lastColorShift = 0
-    local conn
-    conn = RunService.Heartbeat:Connect(function(delta)
-        local t = tick()
-        local colorShift = (t % 3) / 3
-        for _, particle in ipairs(particles) do
-            local pos = particle.Main.Position
-            local newX = (pos.X.Scale + particle.Velocity.X) % 1
-            local newY = (pos.Y.Scale + particle.Velocity.Y) % 1
-            particle.Main.Position = UDim2.new(newX, 0, newY, 0)
-
-            if t - lastColorShift > 0.1 then
-                particle.Main.BackgroundColor3 = Color3.fromHSV(colorShift, 0.8, 1)
-            end
-        end
-        lastColorShift = t
-    end)
-
-    particleFrame.Destroying:Connect(function()
-        conn:Disconnect()
-    end)
-
-    return particleFrame
-end
-
---====================================================--
--- Create Hexagon (Rounded Hex-like Style)
---====================================================--
-function NexusUI:CreateHexagon()
-    local hexagon = Instance.new("Frame")
-    hexagon.Size = UDim2.new(0, 80, 0, 70)
-    hexagon.BackgroundColor3 = NexusUI.QuantumColors.NexusVoid
-    hexagon.BorderSizePixel = 0
-
-    local uiCorner = Instance.new("UICorner")
-    uiCorner.CornerRadius = UDim.new(0, 15)
-    uiCorner.Parent = hexagon
-
-    local uiStroke = Instance.new("UIStroke")
-    uiStroke.Color = NexusUI.QuantumColors.NexusCore
-    uiStroke.Thickness = 2
-    uiStroke.Parent = hexagon
-
-    return hexagon
-end
-
---====================================================--
--- Quantum Window System (Now Draggable + Auto Parent)
---====================================================--
-function NexusUI:CreateWindow(options)
-    options = options or {}
-
-    local window = {
-        Name = options.Name or "Nexus Quantum Interface",
-        Size = options.Size or UDim2.new(0, 500, 0, 400),
-        Position = options.Position or UDim2.new(0.5, -250, 0.5, -200),
-    }
-
-    local mainFrame = Instance.new("Frame")
-    mainFrame.Size = window.Size
-    mainFrame.Position = window.Position
-    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-    mainFrame.BackgroundColor3 = NexusUI.QuantumColors.NexusVoid
-    mainFrame.BackgroundTransparency = 0.1
-    mainFrame.BorderSizePixel = 0
-    mainFrame.Name = window.Name
-    mainFrame.Parent = options.Parent or PlayerGui
-
-    local borderGlow = Instance.new("UIStroke")
-    borderGlow.Color = NexusUI.QuantumColors.NexusCore
-    borderGlow.Thickness = 3
-    borderGlow.Transparency = 0.3
-    borderGlow.Parent = mainFrame
-
-    NexusUI:CreateParticleField(mainFrame)
-
-    local header = Instance.new("Frame")
-    header.Size = UDim2.new(1, 0, 0, 40)
-    header.BackgroundColor3 = NexusUI.QuantumColors.NexusCore
-    header.BackgroundTransparency = 0.8
-    header.BorderSizePixel = 0
-    header.Parent = mainFrame
-
-    local headerLabel = Instance.new("TextLabel")
-    headerLabel.Size = UDim2.new(1, -50, 1, 0)
-    headerLabel.Position = UDim2.new(0, 10, 0, 0)
-    headerLabel.BackgroundTransparency = 1
-    headerLabel.Text = window.Name
-    headerLabel.TextColor3 = Color3.new(1, 1, 1)
-    headerLabel.TextXAlignment = Enum.TextXAlignment.Left
-    headerLabel.Font = Enum.Font.GothamBold
-    headerLabel.TextSize = 16
-    headerLabel.Parent = header
-
-    local closeButton = Instance.new("TextButton")
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(1, -35, 0, 5)
-    closeButton.BackgroundColor3 = NexusUI.QuantumColors.NexusEnergy
-    closeButton.BackgroundTransparency = 0.7
-    closeButton.Text = "X"
-    closeButton.TextColor3 = Color3.new(1, 1, 1)
-    closeButton.Font = Enum.Font.GothamBold
-    closeButton.TextSize = 14
-    closeButton.BorderSizePixel = 0
-    closeButton.Parent = header
-
-    local contentFrame = Instance.new("Frame")
-    contentFrame.Size = UDim2.new(1, -20, 1, -60)
-    contentFrame.Position = UDim2.new(0, 10, 0, 50)
-    contentFrame.BackgroundTransparency = 1
-    contentFrame.Parent = mainFrame
-
-    local uiListLayout = Instance.new("UIListLayout")
-    uiListLayout.Padding = UDim.new(0, 10)
-    uiListLayout.Parent = contentFrame
-
-    -- Visibility + Destroy
-    function window:SetVisible(visible)
-        mainFrame.Visible = visible
-    end
-    function window:Destroy()
-        mainFrame:Destroy()
-    end
-    closeButton.MouseButton1Click:Connect(function()
-        window:SetVisible(false)
-    end)
-
-    -- Draggable Header
-    local dragging, dragInput, dragStart, startPos
-    header.InputBegan:Connect(function(input)
+    frame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = input.Position
-            startPos = mainFrame.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
         end
     end)
-    header.InputEnded:Connect(function(input)
+
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+end
+
+-- Window creation
+function NexusUI:CreateWindow(title)
+    local window = Instance.new("Frame")
+    window.Name = title
+    window.Size = UDim2.new(0, 400, 0, 300)
+    window.Position = UDim2.new(0.5, -200, 0.5, -150)
+    window.BackgroundColor3 = Theme.Background
+    window.BorderSizePixel = 0
+    window.Parent = UI
+
+    MakeDraggable(window)
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 0, 30)
+    titleLabel.BackgroundColor3 = Theme.Primary
+    titleLabel.TextColor3 = Theme.TextColor
+    titleLabel.Text = title
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 18
+    titleLabel.Parent = window
+
+    local content = Instance.new("Frame")
+    content.Size = UDim2.new(1, 0, 1, -30)
+    content.Position = UDim2.new(0, 0, 0, 30)
+    content.BackgroundTransparency = 1
+    content.Parent = window
+
+    return {
+        Window = window,
+        Content = content,
+        AddButton = function(self, text, callback)
+            local button = Instance.new("TextButton")
+            button.Size = UDim2.new(1, -20, 0, 30)
+            button.Position = UDim2.new(0, 10, 0, #content:GetChildren() * 35)
+            button.BackgroundColor3 = Theme.Secondary
+            button.TextColor3 = Theme.TextColor
+            button.Text = text
+            button.Font = Enum.Font.Gotham
+            button.TextSize = 16
+            button.Parent = content
+
+            button.MouseButton1Click:Connect(callback)
+        end
+    }
+end
+
+return NexusUI
+
+-- NexusUI Part 2/3: Toggles, Sliders, Dropdowns
+local NexusUI = ...
+
+-- Toggle
+function NexusUI:AddToggle(windowTable, text, default, callback)
+    default = default or false
+    local content = windowTable.Content
+    local index = #content:GetChildren() + 1
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, -20, 0, 30)
+    frame.Position = UDim2.new(0, 10, 0, (index - 1) * 35)
+    frame.BackgroundColor3 = Theme.Secondary
+    frame.Parent = content
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.8, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Theme.TextColor
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 16
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
+
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(0.2, -5, 1, -5)
+    toggleButton.Position = UDim2.new(0.8, 5, 0, 2)
+    toggleButton.BackgroundColor3 = default and Theme.Accent or Theme.Primary
+    toggleButton.Text = ""
+    toggleButton.Parent = frame
+
+    local toggled = default
+    toggleButton.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        toggleButton.BackgroundColor3 = toggled and Theme.Accent or Theme.Primary
+        if callback then
+            callback(toggled)
+        end
+    end)
+end
+
+-- Slider
+function NexusUI:AddSlider(windowTable, text, min, max, default, callback)
+    local content = windowTable.Content
+    local index = #content:GetChildren() + 1
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, -20, 0, 40)
+    frame.Position = UDim2.new(0, 10, 0, (index - 1) * 45)
+    frame.BackgroundColor3 = Theme.Secondary
+    frame.Parent = content
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 15)
+    label.BackgroundTransparency = 1
+    label.Text = text .. " (" .. tostring(default) .. ")"
+    label.TextColor3 = Theme.TextColor
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 14
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
+
+    local sliderFrame = Instance.new("Frame")
+    sliderFrame.Size = UDim2.new(1, -10, 0, 15)
+    sliderFrame.Position = UDim2.new(0, 5, 0, 20)
+    sliderFrame.BackgroundColor3 = Theme.Primary
+    sliderFrame.Parent = frame
+
+    local fill = Instance.new("Frame")
+    fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+    fill.BackgroundColor3 = Theme.Accent
+    fill.Parent = sliderFrame
+
+    local dragging = false
+    local function updateSlider(x)
+        local relative = math.clamp(x - sliderFrame.AbsolutePosition.X, 0, sliderFrame.AbsoluteSize.X)
+        local value = min + ((relative / sliderFrame.AbsoluteSize.X) * (max - min))
+        fill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+        label.Text = text .. " (" .. math.floor(value) .. ")"
+        if callback then callback(value) end
+    end
+
+    sliderFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            updateSlider(input.Position.X)
+        end
+    end)
+    sliderFrame.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
     UserInputService.InputChanged:Connect(function(input)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            updateSlider(input.Position.X)
+        end
+    end)
+end
+
+-- Dropdown
+function NexusUI:AddDropdown(windowTable, text, options, callback)
+    local content = windowTable.Content
+    local index = #content:GetChildren() + 1
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, -20, 0, 30)
+    frame.Position = UDim2.new(0, 10, 0, (index - 1) * 35)
+    frame.BackgroundColor3 = Theme.Secondary
+    frame.Parent = content
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.7, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Theme.TextColor
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 16
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
+
+    local dropdownBtn = Instance.new("TextButton")
+    dropdownBtn.Size = UDim2.new(0.3, -5, 1, -5)
+    dropdownBtn.Position = UDim2.new(0.7, 5, 0, 2)
+    dropdownBtn.BackgroundColor3 = Theme.Primary
+    dropdownBtn.Text = "▼"
+    dropdownBtn.Parent = frame
+
+    local dropdownFrame = Instance.new("Frame")
+    dropdownFrame.Size = UDim2.new(0, 0, 0, 0)
+    dropdownFrame.Position = UDim2.new(0, 0, 0, 30)
+    dropdownFrame.BackgroundColor3 = Theme.Secondary
+    dropdownFrame.ClipsDescendants = true
+    dropdownFrame.Parent = frame
+
+    local open = false
+    dropdownBtn.MouseButton1Click:Connect(function()
+        open = not open
+        if open then
+            dropdownFrame:TweenSize(UDim2.new(1, 0, 0, #options * 25), "Out", "Quad", 0.3, true)
+        else
+            dropdownFrame:TweenSize(UDim2.new(1, 0, 0, 0), "Out", "Quad", 0.3, true)
         end
     end)
 
-    window.MainFrame = mainFrame
-    window.ContentFrame = contentFrame
-    return window
-end
+    for i, option in ipairs(options) do
+        local optBtn = Instance.new("TextButton")
+        optBtn.Size = UDim2.new(1, 0, 0, 25)
+        optBtn.Position = UDim2.new(0, 0, 0, (i - 1) * 25)
+        optBtn.BackgroundColor3 = Theme.Primary
+        optBtn.TextColor3 = Theme.TextColor
+        optBtn.Text = option
+        optBtn.Font = Enum.Font.Gotham
+        optBtn.TextSize = 14
+        optBtn.Parent = dropdownFrame
 
---====================================================--
--- Quantum Button (unchanged)
---====================================================--
-function NexusUI:CreateButton(options)
-    options = options or {}
-
-    local button = Instance.new("TextButton")
-    button.Size = options.Size or UDim2.new(1, 0, 0, 40)
-    button.BackgroundColor3 = NexusUI.QuantumColors.NexusVoid
-    button.BackgroundTransparency = 0.2
-    button.Text = options.Text or "Quantum Button"
-    button.TextColor3 = Color3.new(1, 1, 1)
-    button.Font = Enum.Font.Gotham
-    button.TextSize = 14
-    button.BorderSizePixel = 0
-    button.AutoButtonColor = false
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = button
-
-    local glow = Instance.new("UIStroke")
-    glow.Color = NexusUI.QuantumColors.NexusCore
-    glow.Thickness = 2
-    glow.Transparency = 0.5
-    glow.Parent = button
-
-    button.MouseEnter:Connect(function()
-        TweenService:Create(glow, TweenInfo.new(0.2), {Transparency = 0.2}):Play()
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundTransparency = 0.1}):Play()
-    end)
-    button.MouseLeave:Connect(function()
-        TweenService:Create(glow, TweenInfo.new(0.2), {Transparency = 0.5}):Play()
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundTransparency = 0.2}):Play()
-    end)
-    button.MouseButton1Click:Connect(function()
-        local ripple = Instance.new("Frame")
-        ripple.Size = UDim2.new(0, 0, 0, 0)
-        ripple.Position = UDim2.new(0.5, 0, 0.5, 0)
-        ripple.AnchorPoint = Vector2.new(0.5, 0.5)
-        ripple.BackgroundColor3 = NexusUI.QuantumColors.NexusEnergy
-        ripple.BackgroundTransparency = 0.7
-        ripple.BorderSizePixel = 0
-        ripple.Parent = button
-        local rc = Instance.new("UICorner")
-        rc.CornerRadius = UDim.new(1, 0)
-        rc.Parent = ripple
-        TweenService:Create(ripple, TweenInfo.new(0.6), {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1
-        }):Play()
-        task.delay(0.6, function() ripple:Destroy() end)
-        if options.Callback then options.Callback() end
-    end)
-    return button
-end
-
---====================================================--
--- Script Hub (Now has holographic tooltips)
---====================================================--
-function NexusUI:CreateScriptHub(options)
-    options = options or {}
-    local hubWindow = NexusUI:CreateWindow({
-        Name = options.Name or "Nexus Quantum Hub",
-        Size = UDim2.new(0, 600, 0, 500)
-    })
-    local hexGrid = Instance.new("Frame")
-    hexGrid.Size = UDim2.new(1, -20, 1, -60)
-    hexGrid.Position = UDim2.new(0, 10, 0, 50)
-    hexGrid.BackgroundTransparency = 1
-    hexGrid.Parent = hubWindow.MainFrame
-
-    local tooltip = Instance.new("TextLabel")
-    tooltip.Size = UDim2.new(0, 150, 0, 40)
-    tooltip.BackgroundColor3 = NexusUI.QuantumColors.NexusCore
-    tooltip.BackgroundTransparency = 0.4
-    tooltip.TextColor3 = Color3.new(1, 1, 1)
-    tooltip.Font = Enum.Font.Gotham
-    tooltip.TextSize = 12
-    tooltip.Visible = false
-    tooltip.ZIndex = 10
-    tooltip.Parent = hubWindow.MainFrame
-
-    local scripts = options.Scripts or {
-        {Name = "Quantum Fly", Description = "Advanced flight system"},
-        {Name = "Nexus ESP", Description = "Quantum entity tracking"},
-        {Name = "Speed Hack", Description = "Velocity manipulation"},
-        {Name = "Auto Farm", Description = "Automated farming system"},
-        {Name = "Anti-AFK", Description = "Quantum presence maintenance"},
-        {Name = "Script Builder", Description = "Quantum code compiler"},
-    }
-
-    local hexSize, hexSpacing, hexHeight = 80, 10, 70
-    for i, scriptData in ipairs(scripts) do
-        local row, col = math.floor((i - 1) / 3), (i - 1) % 3
-        local hexagon = NexusUI:CreateHexagon()
-        hexagon.Position = UDim2.new(0, col * (hexSize + hexSpacing) + 50, 0, row * (hexHeight + hexSpacing) + 20)
-        hexagon.Parent = hexGrid
-
-        local scriptButton = NexusUI:CreateButton({
-            Size = UDim2.new(1, -10, 1, -10),
-            Text = scriptData.Name,
-            Callback = scriptData.Execute
-        })
-        scriptButton.Position = UDim2.new(0, 5, 0, 5)
-        scriptButton.Parent = hexagon
-        scriptButton.ZIndex = 2
-
-        hexagon.MouseEnter:Connect(function()
-            tooltip.Text = scriptData.Description
-            tooltip.Position = UDim2.new(0, hexagon.AbsolutePosition.X - hubWindow.MainFrame.AbsolutePosition.X + 90,
-                                         0, hexagon.AbsolutePosition.Y - hubWindow.MainFrame.AbsolutePosition.Y)
-            tooltip.Visible = true
-        end)
-        hexagon.MouseLeave:Connect(function()
-            tooltip.Visible = false
+        optBtn.MouseButton1Click:Connect(function()
+            if callback then callback(option) end
+            dropdownFrame:TweenSize(UDim2.new(1, 0, 0, 0), "Out", "Quad", 0.3, true)
+            open = false
         end)
     end
+end
 
-    return hubWindow
+return NexusUI
+
+-- NexusUI Part 3/3: Tabs, Notifications, Theme
+local NexusUI = ...
+
+-- Tabs
+function NexusUI:AddTab(windowTable, tabName)
+    local content = windowTable.Content
+    local tabsFrame = windowTable.Tabs or Instance.new("Frame")
+    if not windowTable.Tabs then
+        tabsFrame.Size = UDim2.new(1, 0, 0, 30)
+        tabsFrame.BackgroundTransparency = 1
+        tabsFrame.Parent = content
+        windowTable.Tabs = tabsFrame
+        windowTable.CurrentTabContent = Instance.new("Frame")
+        windowTable.CurrentTabContent.Size = UDim2.new(1, 0, 1, -30)
+        windowTable.CurrentTabContent.Position = UDim2.new(0, 0, 0, 30)
+        windowTable.CurrentTabContent.BackgroundTransparency = 1
+        windowTable.CurrentTabContent.Parent = content
+    end
+
+    local tabButton = Instance.new("TextButton")
+    tabButton.Size = UDim2.new(0, 100, 1, 0)
+    tabButton.Position = UDim2.new(#tabsFrame:GetChildren() * 100, 0, 0, 0)
+    tabButton.BackgroundColor3 = Theme.Primary
+    tabButton.TextColor3 = Theme.TextColor
+    tabButton.Text = tabName
+    tabButton.Font = Enum.Font.Gotham
+    tabButton.TextSize = 14
+    tabButton.Parent = tabsFrame
+
+    local tabContent = Instance.new("Frame")
+    tabContent.Size = UDim2.new(1, 0, 1, -30)
+    tabContent.BackgroundTransparency = 1
+    tabContent.Visible = false
+    tabContent.Parent = content
+
+    tabButton.MouseButton1Click:Connect(function()
+        for _, child in pairs(content:GetChildren()) do
+            if child:IsA("Frame") and child ~= tabsFrame then
+                child.Visible = false
+            end
+        end
+        tabContent.Visible = true
+        windowTable.CurrentTabContent = tabContent
+    end)
+
+    return tabContent
+end
+
+-- Notifications
+function NexusUI:Notify(title, text, duration)
+    duration = duration or 3
+    local notifyFrame = Instance.new("Frame")
+    notifyFrame.Size = UDim2.new(0, 250, 0, 60)
+    notifyFrame.Position = UDim2.new(1, -260, 1, -70)
+    notifyFrame.BackgroundColor3 = Theme.Secondary
+    notifyFrame.Parent = game:GetService("CoreGui")
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -10, 0, 25)
+    titleLabel.Position = UDim2.new(0, 5, 0, 5)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Theme.TextColor
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 16
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = notifyFrame
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, -10, 0, 25)
+    textLabel.Position = UDim2.new(0, 5, 0, 30)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = text
+    textLabel.TextColor3 = Theme.TextColor
+    textLabel.Font = Enum.Font.Gotham
+    textLabel.TextSize = 14
+    textLabel.TextXAlignment = Enum.TextXAlignment.Left
+    textLabel.Parent = notifyFrame
+
+    spawn(function()
+        wait(duration)
+        notifyFrame:Destroy()
+    end)
+end
+
+-- Theme Support
+function NexusUI:SetTheme(newTheme)
+    for k,v in pairs(newTheme) do
+        Theme[k] = v
+    end
 end
 
 return NexusUI
