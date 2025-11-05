@@ -1,201 +1,29 @@
-Basic Setup
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Seriously56/bronxware-lib/refs/heads/main/lib", true))()
+-- Example implementation
+local NexusUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/your-repo/nexus-ui/main/library.lua"))()
 
--- Create main window
-local window = library:window({
-    name = "Nebula",
-    suffix = "tech",
-    game_name = "Your Game Name",
-    size = UDim2.new(0, 700, 0, 565)
+-- Create main hub
+local hub = NexusUI:CreateScriptHub({
+    Name = "Nexus Quantum v2.0",
+    Scripts = {
+        {
+            Name = "Quantum Fly",
+            Description = "Advanced quantum flight system",
+            Execute = function()
+                -- Your fly script here
+                print("Quantum Fly activated!")
+            end
+        },
+        {
+            Name = "Nexus ESP", 
+            Description = "Quantum entity tracking system",
+            Execute = function()
+                -- Your ESP script here
+                print("Nexus ESP activated!")
+            end
+        }
+        -- Add more scripts...
+    }
 })
 
-Window Creation
-Window Properties
-local window = library:window({
-    name = "Your UI Name",           -- Main title
-    suffix = "tech",                 -- Suffix after name
-    game_name = "Game Information",  -- Game info displayed in footer
-    size = UDim2.new(0, 700, 0, 565) -- Window dimensions
-})
-
-Window Methods
-window:toggle_menu(boolean) - Show/hide the UI
-
-The window is automatically draggable and resizable
-
-Tab System
-Creating Tabs
--- Create main tabs
-local tab1, tab2, tab3 = window:tab({
-    name = "Visuals",
-    icon = "rbxassetid://6034767608",
-    tabs = {"Main", "Settings", "Misc"}
-})
-
-Multi-Section Tabs
-Each tab can have multiple sections that appear as sub-tabs in the header:
--- Access different sections
-local main_section = tab1  -- First section
-local settings_section = tab2  -- Second section
-local misc_section = tab3  -- Third section
-
-UI Elements
-Sections
-Organize elements within sections:
-
-local section = main_section:section({
-    name = "Aimbot",
-    side = "left",      -- "left" or "right"
-    size = 0.5,         -- Relative size (0-1)
-    default = false,    -- Collapsed by default
-    icon = "rbxassetid://6022668898",
-    fading = true       -- Enable collapse animation
-})
-
-Toggle
-
-local toggle = section:toggle({
-    name = "Enable Aimbot",
-    default = false,
-    flag = "aimbot_enabled",
-    callback = function(state)
-        print("Aimbot:", state)
-    end
-})
-
-Slider
-local slider = section:slider({
-    name = "Field of View",
-    suffix = "°",
-    min = 0,
-    max = 360,
-    default = 90,
-    flag = "fov_value",
-    callback = function(value)
-        print("FOV:", value)
-    end
-})
-
-Dropdown
-local dropdown = section:dropdown({
-    name = "Target Selection",
-    options = {"Closest", "Farthest", "Crosshair"},
-    default = "Closest",
-    flag = "target_mode",
-    multi = false,  -- Set to true for multi-select
-    callback = function(selected)
-        print("Selected:", selected)
-    end
-})
-
-Color Picker
-local colorpicker = section:colorpicker({
-    name = "ESP Color",
-    color = Color3.fromRGB(255, 0, 0),
-    alpha = 0.5,
-    flag = "esp_color",
-    callback = function(color, alpha)
-        print("Color:", color, "Alpha:", alpha)
-    end
-})
-
-Keybind
-local keybind = section:keybind({
-    name = "Aimbot Key",
-    key = Enum.KeyCode.LeftShift,
-    mode = "Toggle",  -- "Toggle", "Hold", "Always"
-    flag = "aimbot_key",
-    callback = function(state)
-        print("Key state:", state)
-    end
-})
-
-Button
-local button = section:button({
-    name = "Execute",
-    callback = function()
-        print("Button clicked!")
-    end
-})
-
-Label
-local label = section:label({
-    name = "Information Text",
-    info = "Additional details here"  -- Optional
-})
-
-Textbox
-local textbox = section:textbox({
-    name = "Player Name",
-    placeholder = "Enter username...",
-    default = "",
-    flag = "player_name",
-    callback = function(text)
-        print("Text:", text)
-    end
-})
-
-List
-local list = section:list({
-    options = {"Option 1", "Option 2", "Option 3"},
-    flag = "selected_option",
-    callback = function(option)
-        print("Selected:", option)
-    end
-})
-
-Configuration System
-Built-in Config Manager
-The library includes a complete configuration system:
--- Initialize config system (automatically adds config tab)
-library:init_config(window)
-
-Manual Config Handling
--- Save configuration
-local config_data = library:get_config()
-writefile("config.cfg", config_data)
-
--- Load configuration
-library:load_config(readfile("config.cfg"))
-
-Utility Functions
-Theme Management
-
--- Change accent color
-library:update_theme("accent", Color3.fromRGB(0, 255, 0))
-
--- Apply theme to specific element
-library:apply_theme(element, "accent", "BackgroundColor3")
-
-Notifications
-library.notifications:create_notification({
-    name = "Success",
-    info = "Operation completed successfully",
-    lifetime = 5  -- seconds
-})
-
-Element Visibility Control
--- Close any open dropdowns/colorpickers
-library:close_element()
-
-Custom Creation
--- Create custom instances
-local frame = library:create("Frame", {
-    Size = UDim2.new(1, 0, 1, 0),
-    BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-})
-
-Dynamic Updates
--- Update dropdown options
-dropdown:refresh_options({"New", "Option", "List"})
-
--- Change slider text
-slider:changetext("New Slider Name")
-
--- Update label text
-label:set("Updated Text")
-
-Flag System
-print(library.flags.aimbot_enabled)
-print(library.flags.fov_value)
-
+-- Show the hub
+hub:SetVisible(true)
