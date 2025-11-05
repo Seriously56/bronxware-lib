@@ -1,29 +1,73 @@
--- Example implementation
+-- Load the library (replace with your actual loadstring)
 local NexusUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Seriously56/bronxware-lib/refs/heads/main/lib"))()
 
--- Create main hub
-local hub = NexusUI:CreateScriptHub({
-    Name = "Nexus Quantum v2.0",
-    Scripts = {
-        {
-            Name = "Quantum Fly",
-            Description = "Advanced quantum flight system",
-            Execute = function()
-                -- Your fly script here
-                print("Quantum Fly activated!")
-            end
-        },
-        {
-            Name = "Nexus ESP", 
-            Description = "Quantum entity tracking system",
-            Execute = function()
-                -- Your ESP script here
-                print("Nexus ESP activated!")
-            end
-        }
-        -- Add more scripts...
-    }
+-- Create main window
+local window = NexusUI:Window("Nexus Hub v2.0")
+
+-- Create tabs
+local mainTab = NexusUI:Tab("Main")
+local combatTab = NexusUI:Tab("Combat")
+local miscTab = NexusUI:Tab("Misc")
+
+-- Add tab buttons to a container (you'd need to position these)
+mainTab.Button.Parent = window.ContentFrame
+combatTab.Button.Parent = window.ContentFrame  
+miscTab.Button.Parent = window.ContentFrame
+
+-- Add content to main tab
+mainTab.Content.Parent = window.ContentFrame
+
+-- Add elements to main tab
+NexusUI:Label({
+    Text = "Welcome to Nexus Hub",
+    TextSize = 18,
+    Align = Enum.TextXAlignment.Center,
+    Parent = mainTab.Content
 })
 
--- Show the hub
-hub:SetVisible(true)
+NexusUI:Button({
+    Text = "Execute All Scripts",
+    Parent = mainTab.Content,
+    Callback = function()
+        print("Executing all scripts...")
+        -- Your script execution code here
+    end
+})
+
+NexusUI:Toggle({
+    Text = "Enable Auto Farm",
+    Parent = mainTab.Content,
+    Callback = function(value)
+        print("Auto Farm:", value)
+    end
+})
+
+NexusUI:Slider({
+    Text = "Walk Speed",
+    Min = 16,
+    Max = 200,
+    Default = 16,
+    Parent = mainTab.Content,
+    Callback = function(value)
+        print("Walk Speed:", value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+    end
+})
+
+-- Tab switching function
+local function switchToTab(tab)
+    mainTab:Hide()
+    combatTab:Hide() 
+    miscTab:Hide()
+    tab:Show()
+end
+
+mainTab.OnClick = function() switchToTab(mainTab) end
+combatTab.OnClick = function() switchToTab(combatTab) end  
+miscTab.OnClick = function() switchToTab(miscTab) end
+
+-- Show main tab by default
+switchToTab(mainTab)
+
+-- Show the window
+window:Show()
