@@ -1,5 +1,5 @@
 -- Example implementation
-local NexusUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/your-repo/nexus-ui/main/library.lua"))()
+local NexusUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Seriously56/bronxware-lib/refs/heads/main/lib"))()
 
 -- Create main hub
 local hub = NexusUI:CreateScriptHub({
