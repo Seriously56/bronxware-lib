@@ -1,522 +1,896 @@
--- Nexus UI Library - Complete Working Version
-local NexusUI = {}
-NexusUI.__index = NexusUI
+-- BronxWare UI Library
+-- Version: 1.0
+-- Description: A comprehensive UI library for Roblox with theming, config management, and various UI elements
+
+local BronxWare = {}
 
 -- Services
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-
--- Colors
-NexusUI.Colors = {
-    Background = Color3.fromRGB(15, 15, 25),
-    Secondary = Color3.fromRGB(30, 25, 45),
-    Accent = Color3.fromRGB(0, 255, 255),
-    Energy = Color3.fromRGB(255, 50, 150),
-    Text = Color3.fromRGB(255, 255, 255),
-    Border = Color3.fromRGB(60, 60, 80)
+local Services = {
+    UserInputService = game:GetService("UserInputService"),
+    Players = game:GetService("Players"),
+    Workspace = game:GetService("Workspace"),
+    ReplicatedStorage = game:GetService("ReplicatedStorage"),
+    HttpService = game:GetService("HttpService"),
+    GuiService = game:GetService("GuiService"),
+    Lighting = game:GetService("Lighting"),
+    RunService = game:GetService("RunService"),
+    Stats = game:GetService("Stats"),
+    CoreGui = game:GetService("CoreGui"),
+    Debris = game:GetService("Debris"),
+    TweenService = game:GetService("TweenService"),
+    SoundService = game:GetService("SoundService"),
+    TeleportService = game:GetService("TeleportService")
 }
 
--- ScreenGui Container
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "NexusUILibrary"
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-
--- Utility Functions
-function NexusUI:Create(className, properties)
-    local instance = Instance.new(className)
-    for property, value in pairs(properties) do
-        instance[property] = value
-    end
-    return instance
+-- Utility functions
+local function rgb(r, g, b)
+    return Color3.fromRGB(r, g, b)
 end
 
-function NexusUI:RoundedCorners(radius)
-    return self:Create("UICorner", {CornerRadius = UDim.new(0, radius or 8)})
+local function hex(color)
+    return Color3.fromHex(color)
 end
 
-function NexusUI:Stroke(thickness, color)
-    return self:Create("UIStroke", {
-        Thickness = thickness or 1,
-        Color = color or self.Colors.Border,
-        ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    })
+local function dim2(xScale, xOffset, yScale, yOffset)
+    return UDim2.new(xScale, xOffset, yScale, yOffset)
 end
 
--- Main Window
-function NexusUI:Window(title)
-    title = title or "Nexus Hub"
+local function vec2(x, y)
+    return Vector2.new(x, y)
+end
+
+-- LPH Obfuscation compatibility
+if LPH_OBFUSCATED == nil then
+    local assert = assert
+    local type = type
+    local setfenv = setfenv
     
-    local window = {}
-    
-    -- Main Frame
-    local mainFrame = self:Create("Frame", {
-        Parent = screenGui,
-        Size = UDim2.new(0, 500, 0, 400),
-        Position = UDim2.new(0.5, -250, 0.5, -200),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        BackgroundColor3 = self.Colors.Background,
-        BackgroundTransparency = 0.1,
-        BorderSizePixel = 0
-    })
-    
-    -- Window Glow
-    local glow = self:Stroke(3, self.Colors.Accent)
-    glow.Transparency = 0.7
-    glow.Parent = mainFrame
-    
-    -- Corners
-    self:RoundedCorners(12).Parent = mainFrame
-    
-    -- Header
-    local header = self:Create("Frame", {
-        Parent = mainFrame,
-        Size = UDim2.new(1, 0, 0, 40),
-        BackgroundColor3 = self.Colors.Secondary,
-        BorderSizePixel = 0
-    })
-    
-    self:RoundedCorners(12).Parent = header
-    
-    -- Header Gradient
-    local gradient = self:Create("UIGradient", {
-        Parent = header,
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, self.Colors.Secondary),
-            ColorSequenceKeypoint.new(1, self.Colors.Accent)
-        }),
-        Rotation = 90
-    })
-    
-    -- Title
-    local titleLabel = self:Create("TextLabel", {
-        Parent = header,
-        Size = UDim2.new(1, -50, 1, 0),
-        Position = UDim2.new(0, 15, 0, 0),
-        BackgroundTransparency = 1,
-        Text = title,
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.GothamBold,
-        TextSize = 18,
-        TextXAlignment = Enum.TextXAlignment.Left
-    })
-    
-    -- Close Button
-    local closeButton = self:Create("TextButton", {
-        Parent = header,
-        Size = UDim2.new(0, 30, 0, 30),
-        Position = UDim2.new(1, -35, 0, 5),
-        BackgroundColor3 = self.Colors.Energy,
-        BackgroundTransparency = 0.2,
-        Text = "X",
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.GothamBold,
-        TextSize = 16,
-        BorderSizePixel = 0
-    })
-    
-    self:RoundedCorners(8).Parent = closeButton
-    
-    -- Content Frame
-    local contentFrame = self:Create("Frame", {
-        Parent = mainFrame,
-        Size = UDim2.new(1, -20, 1, -60),
-        Position = UDim2.new(0, 10, 0, 50),
-        BackgroundTransparency = 1
-    })
-    
-    -- Scroll Frame
-    local scrollFrame = self:Create("ScrollingFrame", {
-        Parent = contentFrame,
-        Size = UDim2.new(1, 0, 1, 0),
-        BackgroundTransparency = 1,
-        ScrollBarThickness = 4,
-        ScrollBarImageColor3 = self.Colors.Accent,
-        CanvasSize = UDim2.new(0, 0, 0, 0),
-        BorderSizePixel = 0
-    })
-    
-    local uiListLayout = self:Create("UIListLayout", {
-        Parent = scrollFrame,
-        Padding = UDim.new(0, 10)
-    })
-    
-    -- Update canvas size
-    uiListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        scrollFrame.CanvasSize = UDim2.new(0, 0, 0, uiListLayout.AbsoluteContentSize.Y)
-    end)
-    
-    -- Window Methods
-    function window:Show()
-        mainFrame.Visible = true
+    LPH_ENCNUM = function(toEncrypt, ...)
+        assert(type(toEncrypt) == "number" and #{...} == 0, "LPH_ENCNUM only accepts a single constant double or integer as an argument.")
+        return toEncrypt
     end
     
-    function window:Hide()
-        mainFrame.Visible = false
+    LPH_NUMENC = LPH_ENCNUM
+    
+    LPH_ENCSTR = function(toEncrypt, ...)
+        assert(type(toEncrypt) == "string" and #{...} == 0, "LPH_ENCSTR only accepts a single constant string as an argument.")
+        return toEncrypt
     end
     
-    function window:Destroy()
-        mainFrame:Destroy()
+    LPH_STRENC = LPH_ENCSTR
+    
+    LPH_ENCFUNC = function(toEncrypt, encKey, decKey, ...)
+        assert(type(toEncrypt) == "function" and type(encKey) == "string" and #{...} == 0, "LPH_ENCFUNC accepts a constant function, constant string, and string variable as arguments.")
+        return toEncrypt
     end
     
-    -- Close button functionality
+    LPH_FUNCENC = LPH_ENCFUNC
+    
+    LPH_JIT = function(f, ...)
+        assert(type(f) == "function" and #{...} == 0, "LPH_JIT only accepts a single constant function as an argument.")
+        return f
+    end
+    
+    LPH_JIT_MAX = LPH_JIT
+    
+    LPH_NO_VIRTUALIZE = function(f, ...)
+        assert(type(f) == "function" and #{...} == 0, "LPH_NO_VIRTUALIZE only accepts a single constant function as an argument.")
+        return f
+    end
+    
+    LPH_CRASH = function(...)
+        assert(#{...} == 0, "LPH_CRASH does not accept any arguments.")
+        game:Shutdown()
+        while true do end
+    end
+end
+
+-- Library initialization
+BronxWare.Themes = {
+    Dark = {
+        Background = rgb(14, 14, 16),
+        Foreground = rgb(25, 25, 29),
+        Accent = rgb(0, 162, 255),
+        Text = rgb(255, 255, 255),
+        SubText = rgb(130, 130, 130)
+    }
+}
+
+BronxWare.Elements = {}
+
+-- Base window creation
+function BronxWare:CreateWindow(options)
+    local config = {
+        Name = options.Name or "BronxWare",
+        Size = options.Size or dim2(0, 600, 0, 400),
+        Theme = options.Theme or "Dark",
+        Position = options.Position or dim2(0.5, -300, 0.5, -200)
+    }
+    
+    local window = {
+        Config = config,
+        Tabs = {},
+        CurrentTab = nil,
+        Flags = {},
+        Notifications = {}
+    }
+    
+    -- Create main GUI
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "BronxWareUI"
+    screenGui.Parent = Services.CoreGui
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+    window.ScreenGui = screenGui
+    
+    -- Main frame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = config.Size
+    mainFrame.Position = config.Position
+    mainFrame.BackgroundColor3 = BronxWare.Themes[config.Theme].Background
+    mainFrame.BorderSizePixel = 0
+    mainFrame.ClipsDescendants = true
+    mainFrame.Parent = screenGui
+    
+    -- Corner
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = mainFrame
+    
+    -- Stroke
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = BronxWare.Themes[config.Theme].Foreground
+    stroke.Thickness = 1
+    stroke.Parent = mainFrame
+    
+    -- Title bar
+    local titleBar = Instance.new("Frame")
+    titleBar.Name = "TitleBar"
+    titleBar.Size = dim2(1, 0, 0, 30)
+    titleBar.BackgroundColor3 = BronxWare.Themes[config.Theme].Foreground
+    titleBar.BorderSizePixel = 0
+    titleBar.Parent = mainFrame
+    
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "TitleLabel"
+    titleLabel.Size = dim2(1, -60, 1, 0)
+    titleLabel.Position = dim2(0, 10, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = config.Name
+    titleLabel.TextColor3 = BronxWare.Themes[config.Theme].Text
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Font = Enum.Font.GothamSemibold
+    titleLabel.TextSize = 14
+    titleLabel.Parent = titleBar
+    
+    -- Close button
+    local closeButton = Instance.new("TextButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Size = dim2(0, 20, 0, 20)
+    closeButton.Position = dim2(1, -25, 0.5, -10)
+    closeButton.BackgroundColor3 = rgb(255, 60, 60)
+    closeButton.BorderSizePixel = 0
+    closeButton.Text = "X"
+    closeButton.TextColor3 = rgb(255, 255, 255)
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.TextSize = 12
+    closeButton.Parent = titleBar
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 4)
+    closeCorner.Parent = closeButton
+    
     closeButton.MouseButton1Click:Connect(function()
-        window:Hide()
+        screenGui:Destroy()
     end)
     
-    closeButton.MouseEnter:Connect(function()
-        TweenService:Create(closeButton, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
-    end)
+    -- Tab container
+    local tabContainer = Instance.new("Frame")
+    tabContainer.Name = "TabContainer"
+    tabContainer.Size = dim2(0, 120, 1, -30)
+    tabContainer.Position = dim2(0, 0, 0, 30)
+    tabContainer.BackgroundColor3 = BronxWare.Themes[config.Theme].Foreground
+    tabContainer.BorderSizePixel = 0
+    tabContainer.Parent = mainFrame
     
-    closeButton.MouseLeave:Connect(function()
-        TweenService:Create(closeButton, TweenInfo.new(0.2), {BackgroundTransparency = 0.2}):Play()
-    end)
+    -- Content container
+    local contentContainer = Instance.new("Frame")
+    contentContainer.Name = "ContentContainer"
+    contentContainer.Size = dim2(1, -120, 1, -30)
+    contentContainer.Position = dim2(0, 120, 0, 30)
+    contentContainer.BackgroundColor3 = BronxWare.Themes[config.Theme].Background
+    contentContainer.BorderSizePixel = 0
+    contentContainer.Parent = mainFrame
     
-    window.MainFrame = mainFrame
-    window.ContentFrame = scrollFrame
+    window.TabContainer = tabContainer
+    window.ContentContainer = contentContainer
     
-    return window
-end
-
--- Button
-function NexusUI:Button(props)
-    props = props or {}
-    
-    local button = self:Create("TextButton", {
-        Size = props.Size or UDim2.new(1, 0, 0, 40),
-        BackgroundColor3 = self.Colors.Secondary,
-        BackgroundTransparency = 0.1,
-        Text = props.Text or "Button",
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 14,
-        AutoButtonColor = false,
-        BorderSizePixel = 0
-    })
-    
-    self:RoundedCorners(8).Parent = button
-    
-    local stroke = self:Stroke(2, self.Colors.Accent)
-    stroke.Transparency = 0.5
-    stroke.Parent = button
-    
-    -- Hover effects
-    button.MouseEnter:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = self.Colors.Accent}):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.2), {Transparency = 0}):Play()
-    end)
-    
-    button.MouseLeave:Connect(function()
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = self.Colors.Secondary}):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.2), {Transparency = 0.5}):Play()
-    end)
-    
-    -- Click effect
-    button.MouseButton1Click:Connect(function()
-        -- Ripple effect
-        local ripple = self:Create("Frame", {
-            Parent = button,
-            Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0.5, 0, 0.5, 0),
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            BackgroundColor3 = self.Colors.Energy,
-            BackgroundTransparency = 0.7,
-            BorderSizePixel = 0
-        })
-        
-        self:RoundedCorners(100).Parent = ripple
-        
-        TweenService:Create(ripple, TweenInfo.new(0.6), {
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1
-        }):Play()
-        
-        delay(0.6, function()
-            ripple:Destroy()
-        end)
-        
-        if props.Callback then
-            props.Callback()
-        end
-    end)
-    
-    if props.Parent then
-        button.Parent = props.Parent
-    end
-    
-    return button
-end
-
--- Toggle
-function NexusUI:Toggle(props)
-    props = props or {}
-    
-    local toggle = {
-        Value = props.Default or false
-    }
-    
-    local container = self:Create("Frame", {
-        Size = props.Size or UDim2.new(1, 0, 0, 30),
-        BackgroundTransparency = 1
-    })
-    
-    local label = self:Create("TextLabel", {
-        Parent = container,
-        Size = UDim2.new(0.7, 0, 1, 0),
-        BackgroundTransparency = 1,
-        Text = props.Text or "Toggle",
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Left
-    })
-    
-    local toggleFrame = self:Create("Frame", {
-        Parent = container,
-        Size = UDim2.new(0, 50, 0, 25),
-        Position = UDim2.new(1, -50, 0, 2),
-        BackgroundColor3 = self.Colors.Secondary,
-        BorderSizePixel = 0
-    })
-    
-    self:RoundedCorners(12).Parent = toggleFrame
-    
-    local toggleButton = self:Create("Frame", {
-        Parent = toggleFrame,
-        Size = UDim2.new(0, 21, 0, 21),
-        Position = UDim2.new(0, 2, 0, 2),
-        BackgroundColor3 = self.Colors.Energy,
-        BorderSizePixel = 0
-    })
-    
-    self:RoundedCorners(10).Parent = toggleButton
-    
-    local function updateToggle()
-        if toggle.Value then
-            TweenService:Create(toggleButton, TweenInfo.new(0.2), {
-                Position = UDim2.new(1, -23, 0, 2),
-                BackgroundColor3 = self.Colors.Accent
-            }):Play()
-        else
-            TweenService:Create(toggleButton, TweenInfo.new(0.2), {
-                Position = UDim2.new(0, 2, 0, 2),
-                BackgroundColor3 = self.Colors.Energy
-            }):Play()
-        end
-    end
-    
-    container.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            toggle.Value = not toggle.Value
-            updateToggle()
-            if props.Callback then
-                props.Callback(toggle.Value)
-            end
-        end
-    end)
-    
-    updateToggle()
-    
-    function toggle:SetValue(value)
-        toggle.Value = value
-        updateToggle()
-    end
-    
-    if props.Parent then
-        container.Parent = props.Parent
-    end
-    
-    toggle.Container = container
-    return toggle
-end
-
--- Label
-function NexusUI:Label(props)
-    props = props or {}
-    
-    local label = self:Create("TextLabel", {
-        Size = props.Size or UDim2.new(1, 0, 0, 20),
-        BackgroundTransparency = 1,
-        Text = props.Text or "Label",
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = props.TextSize or 14,
-        TextXAlignment = props.Align or Enum.TextXAlignment.Left
-    })
-    
-    if props.Parent then
-        label.Parent = props.Parent
-    end
-    
-    return label
-end
-
--- Slider
-function NexusUI:Slider(props)
-    props = props or {}
-    
-    local slider = {
-        Value = props.Default or props.Min or 0,
-        Min = props.Min or 0,
-        Max = props.Max or 100
-    }
-    
-    local container = self:Create("Frame", {
-        Size = props.Size or UDim2.new(1, 0, 0, 60),
-        BackgroundTransparency = 1
-    })
-    
-    local label = self:Create("TextLabel", {
-        Parent = container,
-        Size = UDim2.new(1, -50, 0, 20),
-        BackgroundTransparency = 1,
-        Text = props.Text or "Slider",
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Left
-    })
-    
-    local valueLabel = self:Create("TextLabel", {
-        Parent = container,
-        Size = UDim2.new(0, 50, 0, 20),
-        Position = UDim2.new(1, -50, 0, 0),
-        BackgroundTransparency = 1,
-        Text = tostring(slider.Value),
-        TextColor3 = self.Colors.Accent,
-        Font = Enum.Font.GothamBold,
-        TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Right
-    })
-    
-    local track = self:Create("Frame", {
-        Parent = container,
-        Size = UDim2.new(1, 0, 0, 6),
-        Position = UDim2.new(0, 0, 0, 30),
-        BackgroundColor3 = self.Colors.Secondary,
-        BorderSizePixel = 0
-    })
-    
-    self:RoundedCorners(3).Parent = track
-    
-    local fill = self:Create("Frame", {
-        Parent = track,
-        Size = UDim2.new(0, 0, 1, 0),
-        BackgroundColor3 = self.Colors.Accent,
-        BorderSizePixel = 0
-    })
-    
-    self:RoundedCorners(3).Parent = fill
-    
-    local handle = self:Create("Frame", {
-        Parent = track,
-        Size = UDim2.new(0, 16, 0, 16),
-        Position = UDim2.new(0, 0, 0.5, -8),
-        AnchorPoint = Vector2.new(0, 0.5),
-        BackgroundColor3 = self.Colors.Energy,
-        BorderSizePixel = 0
-    })
-    
-    self:RoundedCorners(8).Parent = handle
-    
-    local function updateSlider(value)
-        local percentage = (value - slider.Min) / (slider.Max - slider.Min)
-        fill.Size = UDim2.new(percentage, 0, 1, 0)
-        handle.Position = UDim2.new(percentage, 0, 0.5, -8)
-        valueLabel.Text = tostring(math.floor(value))
-    end
-    
+    -- Make window draggable
     local dragging = false
+    local dragInput, dragStart, startPos
     
-    track.InputBegan:Connect(function(input)
+    local function update(input)
+        local delta = input.Position - dragStart
+        mainFrame.Position = dim2(0, startPos.X.Offset + delta.X, 0, startPos.Y.Offset + delta.Y)
+    end
+    
+    titleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
+            dragStart = input.Position
+            startPos = mainFrame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
         end
     end)
     
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
+    titleBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
         end
     end)
     
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local mouse = Players.LocalPlayer:GetMouse()
-            local relativeX = (mouse.X - track.AbsolutePosition.X) / track.AbsoluteSize.X
-            relativeX = math.clamp(relativeX, 0, 1)
+    Services.UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+    
+    -- Add tab method
+    function window:AddTab(options)
+        local tabName = options.Name or "Tab"
+        local tabIcon = options.Icon or "rbxassetid://0"
+        
+        local tabButton = Instance.new("TextButton")
+        tabButton.Name = tabName .. "Tab"
+        tabButton.Size = dim2(1, -10, 0, 40)
+        tabButton.Position = dim2(0, 5, 0, 5 + (#self.Tabs * 45))
+        tabButton.BackgroundColor3 = BronxWare.Themes[config.Theme].Background
+        tabButton.BorderSizePixel = 0
+        tabButton.Text = ""
+        tabButton.AutoButtonColor = false
+        tabButton.Parent = self.TabContainer
+        
+        local tabCorner = Instance.new("UICorner")
+        tabCorner.CornerRadius = UDim.new(0, 6)
+        tabCorner.Parent = tabButton
+        
+        local tabLabel = Instance.new("TextLabel")
+        tabLabel.Name = "TabLabel"
+        tabLabel.Size = dim2(1, -40, 1, 0)
+        tabLabel.Position = dim2(0, 35, 0, 0)
+        tabLabel.BackgroundTransparency = 1
+        tabLabel.Text = tabName
+        tabLabel.TextColor3 = BronxWare.Themes[config.Theme].Text
+        tabLabel.TextXAlignment = Enum.TextXAlignment.Left
+        tabLabel.Font = Enum.Font.Gotham
+        tabLabel.TextSize = 12
+        tabLabel.Parent = tabButton
+        
+        local tabIconLabel = Instance.new("ImageLabel")
+        tabIconLabel.Name = "TabIcon"
+        tabIconLabel.Size = dim2(0, 20, 0, 20)
+        tabIconLabel.Position = dim2(0, 8, 0.5, -10)
+        tabIconLabel.BackgroundTransparency = 1
+        tabIconLabel.Image = tabIcon
+        tabIconLabel.ImageColor3 = BronxWare.Themes[config.Theme].Text
+        tabIconLabel.Parent = tabButton
+        
+        local tabContent = Instance.new("Frame")
+        tabContent.Name = tabName .. "Content"
+        tabContent.Size = dim2(1, -10, 1, -10)
+        tabContent.Position = dim2(0, 5, 0, 5)
+        tabContent.BackgroundTransparency = 1
+        tabContent.Visible = false
+        tabContent.Parent = self.ContentContainer
+        
+        local scrollFrame = Instance.new("ScrollingFrame")
+        scrollFrame.Name = "ScrollFrame"
+        scrollFrame.Size = dim2(1, 0, 1, 0)
+        scrollFrame.BackgroundTransparency = 1
+        scrollFrame.BorderSizePixel = 0
+        scrollFrame.ScrollBarThickness = 3
+        scrollFrame.ScrollBarImageColor3 = BronxWare.Themes[config.Theme].Accent
+        scrollFrame.CanvasSize = dim2(0, 0, 0, 0)
+        scrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        scrollFrame.Parent = tabContent
+        
+        local layout = Instance.new("UIListLayout")
+        layout.Padding = UDim.new(0, 5)
+        layout.SortOrder = Enum.SortOrder.LayoutOrder
+        layout.Parent = scrollFrame
+        
+        local padding = Instance.new("UIPadding")
+        padding.PaddingLeft = UDim.new(0, 5)
+        padding.PaddingRight = UDim.new(0, 5)
+        padding.PaddingTop = UDim.new(0, 5)
+        padding.PaddingBottom = UDim.new(0, 5)
+        padding.Parent = scrollFrame
+        
+        local tab = {
+            Name = tabName,
+            Button = tabButton,
+            Content = tabContent,
+            ScrollFrame = scrollFrame,
+            Sections = {}
+        }
+        
+        table.insert(self.Tabs, tab)
+        
+        -- Select first tab by default
+        if #self.Tabs == 1 then
+            self:SelectTab(tab)
+        end
+        
+        tabButton.MouseButton1Click:Connect(function()
+            self:SelectTab(tab)
+        end)
+        
+        -- Add section method for tab
+        function tab:AddSection(options)
+            local sectionName = options.Name or "Section"
             
-            slider.Value = slider.Min + (relativeX * (slider.Max - slider.Min))
-            updateSlider(slider.Value)
+            local sectionFrame = Instance.new("Frame")
+            sectionFrame.Name = sectionName .. "Section"
+            sectionFrame.Size = dim2(1, -10, 0, 0)
+            sectionFrame.BackgroundColor3 = BronxWare.Themes[config.Theme].Foreground
+            sectionFrame.BorderSizePixel = 0
+            sectionFrame.AutomaticSize = Enum.AutomaticSize.Y
+            sectionFrame.LayoutOrder = #self.Sections + 1
+            sectionFrame.Parent = self.ScrollFrame
             
-            if props.Callback then
-                props.Callback(slider.Value)
+            local sectionCorner = Instance.new("UICorner")
+            sectionCorner.CornerRadius = UDim.new(0, 6)
+            sectionCorner.Parent = sectionFrame
+            
+            local sectionHeader = Instance.new("Frame")
+            sectionHeader.Name = "SectionHeader"
+            sectionHeader.Size = dim2(1, 0, 0, 30)
+            sectionHeader.BackgroundColor3 = BronxWare.Themes[config.Theme].Background
+            sectionHeader.BorderSizePixel = 0
+            sectionHeader.Parent = sectionFrame
+            
+            local headerCorner = Instance.new("UICorner")
+            headerCorner.CornerRadius = UDim.new(0, 6)
+            headerCorner.Parent = sectionHeader
+            
+            local sectionLabel = Instance.new("TextLabel")
+            sectionLabel.Name = "SectionLabel"
+            sectionLabel.Size = dim2(1, -20, 1, 0)
+            sectionLabel.Position = dim2(0, 10, 0, 0)
+            sectionLabel.BackgroundTransparency = 1
+            sectionLabel.Text = sectionName
+            sectionLabel.TextColor3 = BronxWare.Themes[config.Theme].Text
+            sectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+            sectionLabel.Font = Enum.Font.GothamSemibold
+            sectionLabel.TextSize = 13
+            sectionLabel.Parent = sectionHeader
+            
+            local contentFrame = Instance.new("Frame")
+            contentFrame.Name = "ContentFrame"
+            contentFrame.Size = dim2(1, -10, 0, 0)
+            contentFrame.Position = dim2(0, 5, 0, 35)
+            contentFrame.BackgroundTransparency = 1
+            contentFrame.AutomaticSize = Enum.AutomaticSize.Y
+            contentFrame.Parent = sectionFrame
+            
+            local contentLayout = Instance.new("UIListLayout")
+            contentLayout.Padding = UDim.new(0, 5)
+            contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            contentLayout.Parent = contentFrame
+            
+            local section = {
+                Name = sectionName,
+                Frame = sectionFrame,
+                Content = contentFrame,
+                Elements = {}
+            }
+            
+            table.insert(self.Sections, section)
+            
+            -- Add element methods to section
+            function section:AddButton(options)
+                local buttonName = options.Name or "Button"
+                local callback = options.Callback or function() end
+                
+                local buttonFrame = Instance.new("Frame")
+                buttonFrame.Name = buttonName .. "Button"
+                buttonFrame.Size = dim2(1, 0, 0, 30)
+                buttonFrame.BackgroundTransparency = 1
+                buttonFrame.LayoutOrder = #self.Elements + 1
+                buttonFrame.Parent = self.Content
+                
+                local button = Instance.new("TextButton")
+                button.Name = "Button"
+                button.Size = dim2(1, 0, 1, 0)
+                button.BackgroundColor3 = BronxWare.Themes[config.Theme].Accent
+                button.BorderSizePixel = 0
+                button.Text = buttonName
+                button.TextColor3 = rgb(255, 255, 255)
+                button.Font = Enum.Font.Gotham
+                button.TextSize = 12
+                button.Parent = buttonFrame
+                
+                local buttonCorner = Instance.new("UICorner")
+                buttonCorner.CornerRadius = UDim.new(0, 4)
+                buttonCorner.Parent = button
+                
+                button.MouseButton1Click:Connect(function()
+                    callback()
+                end)
+                
+                table.insert(self.Elements, {
+                    Type = "Button",
+                    Name = buttonName,
+                    Element = button
+                })
+                
+                return button
             end
+            
+            function section:AddToggle(options)
+                local toggleName = options.Name or "Toggle"
+                local defaultValue = options.Default or false
+                local callback = options.Callback or function() end
+                local flag = options.Flag or toggleName
+                
+                local toggleFrame = Instance.new("Frame")
+                toggleFrame.Name = toggleName .. "Toggle"
+                toggleFrame.Size = dim2(1, 0, 0, 25)
+                toggleFrame.BackgroundTransparency = 1
+                toggleFrame.LayoutOrder = #self.Elements + 1
+                toggleFrame.Parent = self.Content
+                
+                local toggleLabel = Instance.new("TextLabel")
+                toggleLabel.Name = "ToggleLabel"
+                toggleLabel.Size = dim2(1, -35, 1, 0)
+                toggleLabel.BackgroundTransparency = 1
+                toggleLabel.Text = toggleName
+                toggleLabel.TextColor3 = BronxWare.Themes[config.Theme].Text
+                toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+                toggleLabel.Font = Enum.Font.Gotham
+                toggleLabel.TextSize = 12
+                toggleLabel.Parent = toggleFrame
+                
+                local toggleButton = Instance.new("TextButton")
+                toggleButton.Name = "ToggleButton"
+                toggleButton.Size = dim2(0, 30, 0, 15)
+                toggleButton.Position = dim2(1, -35, 0.5, -7.5)
+                toggleButton.BackgroundColor3 = defaultValue and BronxWare.Themes[config.Theme].Accent or rgb(80, 80, 80)
+                toggleButton.BorderSizePixel = 0
+                toggleButton.Text = ""
+                toggleButton.AutoButtonColor = false
+                toggleButton.Parent = toggleFrame
+                
+                local toggleCorner = Instance.new("UICorner")
+                toggleCorner.CornerRadius = UDim.new(0, 7)
+                toggleCorner.Parent = toggleButton
+                
+                local toggleDot = Instance.new("Frame")
+                toggleDot.Name = "ToggleDot"
+                toggleDot.Size = dim2(0, 11, 0, 11)
+                toggleDot.Position = dim2(0, 2, 0.5, -5.5)
+                toggleDot.BackgroundColor3 = rgb(255, 255, 255)
+                toggleDot.BorderSizePixel = 0
+                toggleDot.Parent = toggleButton
+                
+                local dotCorner = Instance.new("UICorner")
+                dotCorner.CornerRadius = UDim.new(0, 5)
+                dotCorner.Parent = toggleDot
+                
+                local state = defaultValue
+                window.Flags[flag] = state
+                
+                local function updateToggle()
+                    if state then
+                        Services.TweenService:Create(toggleButton, TweenInfo.new(0.2), {BackgroundColor3 = BronxWare.Themes[config.Theme].Accent}):Play()
+                        Services.TweenService:Create(toggleDot, TweenInfo.new(0.2), {Position = dim2(1, -13, 0.5, -5.5)}):Play()
+                    else
+                        Services.TweenService:Create(toggleButton, TweenInfo.new(0.2), {BackgroundColor3 = rgb(80, 80, 80)}):Play()
+                        Services.TweenService:Create(toggleDot, TweenInfo.new(0.2), {Position = dim2(0, 2, 0.5, -5.5)}):Play()
+                    end
+                    callback(state)
+                end
+                
+                toggleButton.MouseButton1Click:Connect(function()
+                    state = not state
+                    window.Flags[flag] = state
+                    updateToggle()
+                end)
+                
+                updateToggle()
+                
+                table.insert(self.Elements, {
+                    Type = "Toggle",
+                    Name = toggleName,
+                    Element = toggleButton,
+                    State = state,
+                    Update = function(newState)
+                        state = newState
+                        window.Flags[flag] = state
+                        updateToggle()
+                    end
+                })
+                
+                return {
+                    Set = function(newState)
+                        state = newState
+                        window.Flags[flag] = state
+                        updateToggle()
+                    end,
+                    Get = function()
+                        return state
+                    end
+                }
+            end
+            
+            function section:AddSlider(options)
+                local sliderName = options.Name or "Slider"
+                local minValue = options.Min or 0
+                local maxValue = options.Max or 100
+                local defaultValue = options.Default or minValue
+                local callback = options.Callback or function() end
+                local flag = options.Flag or sliderName
+                local suffix = options.Suffix or ""
+                
+                local sliderFrame = Instance.new("Frame")
+                sliderFrame.Name = sliderName .. "Slider"
+                sliderFrame.Size = dim2(1, 0, 0, 50)
+                sliderFrame.BackgroundTransparency = 1
+                sliderFrame.LayoutOrder = #self.Elements + 1
+                sliderFrame.Parent = self.Content
+                
+                local sliderLabel = Instance.new("TextLabel")
+                sliderLabel.Name = "SliderLabel"
+                sliderLabel.Size = dim2(1, 0, 0, 20)
+                sliderLabel.BackgroundTransparency = 1
+                sliderLabel.Text = sliderName
+                sliderLabel.TextColor3 = BronxWare.Themes[config.Theme].Text
+                sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+                sliderLabel.Font = Enum.Font.Gotham
+                sliderLabel.TextSize = 12
+                sliderLabel.Parent = sliderFrame
+                
+                local valueLabel = Instance.new("TextLabel")
+                valueLabel.Name = "ValueLabel"
+                valueLabel.Size = dim2(0, 50, 0, 20)
+                valueLabel.Position = dim2(1, -50, 0, 0)
+                valueLabel.BackgroundTransparency = 1
+                valueLabel.Text = tostring(defaultValue) .. suffix
+                valueLabel.TextColor3 = BronxWare.Themes[config.Theme].SubText
+                valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+                valueLabel.Font = Enum.Font.Gotham
+                valueLabel.TextSize = 11
+                valueLabel.Parent = sliderFrame
+                
+                local sliderBackground = Instance.new("Frame")
+                sliderBackground.Name = "SliderBackground"
+                sliderBackground.Size = dim2(1, 0, 0, 5)
+                sliderBackground.Position = dim2(0, 0, 0, 30)
+                sliderBackground.BackgroundColor3 = rgb(60, 60, 60)
+                sliderBackground.BorderSizePixel = 0
+                sliderBackground.Parent = sliderFrame
+                
+                local bgCorner = Instance.new("UICorner")
+                bgCorner.CornerRadius = UDim.new(0, 2)
+                bgCorner.Parent = sliderBackground
+                
+                local sliderFill = Instance.new("Frame")
+                sliderFill.Name = "SliderFill"
+                sliderFill.Size = dim2((defaultValue - minValue) / (maxValue - minValue), 0, 1, 0)
+                sliderFill.BackgroundColor3 = BronxWare.Themes[config.Theme].Accent
+                sliderFill.BorderSizePixel = 0
+                sliderFill.Parent = sliderBackground
+                
+                local fillCorner = Instance.new("UICorner")
+                fillCorner.CornerRadius = UDim.new(0, 2)
+                fillCorner.Parent = sliderFill
+                
+                local sliderButton = Instance.new("TextButton")
+                sliderButton.Name = "SliderButton"
+                sliderButton.Size = dim2(1, 0, 1, 0)
+                sliderButton.BackgroundTransparency = 1
+                sliderButton.Text = ""
+                sliderButton.AutoButtonColor = false
+                sliderButton.Parent = sliderBackground
+                
+                local value = defaultValue
+                window.Flags[flag] = value
+                
+                local function updateSlider(newValue, instant)
+                    value = math.clamp(newValue, minValue, maxValue)
+                    local fillSize = (value - minValue) / (maxValue - minValue)
+                    
+                    if instant then
+                        sliderFill.Size = dim2(fillSize, 0, 1, 0)
+                    else
+                        Services.TweenService:Create(sliderFill, TweenInfo.new(0.1), {Size = dim2(fillSize, 0, 1, 0)}):Play()
+                    end
+                    
+                    valueLabel.Text = tostring(math.floor(value)) .. suffix
+                    window.Flags[flag] = value
+                    callback(value)
+                end
+                
+                local dragging = false
+                
+                sliderButton.MouseButton1Down:Connect(function()
+                    dragging = true
+                end)
+                
+                Services.UserInputService.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        dragging = false
+                    end
+                end)
+                
+                Services.UserInputService.InputChanged:Connect(function(input)
+                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                        local mousePos = Services.UserInputService:GetMouseLocation()
+                        local sliderPos = sliderBackground.AbsolutePosition
+                        local sliderSize = sliderBackground.AbsoluteSize
+                        
+                        local relativeX = (mousePos.X - sliderPos.X) / sliderSize.X
+                        relativeX = math.clamp(relativeX, 0, 1)
+                        
+                        local newValue = minValue + (relativeX * (maxValue - minValue))
+                        updateSlider(newValue, true)
+                    end
+                end)
+                
+                updateSlider(defaultValue, true)
+                
+                table.insert(self.Elements, {
+                    Type = "Slider",
+                    Name = sliderName,
+                    Element = sliderButton,
+                    Value = value,
+                    Update = function(newValue)
+                        updateSlider(newValue, false)
+                    end
+                })
+                
+                return {
+                    Set = function(newValue)
+                        updateSlider(newValue, false)
+                    end,
+                    Get = function()
+                        return value
+                    end
+                }
+            end
+            
+            function section:AddDropdown(options)
+                local dropdownName = options.Name or "Dropdown"
+                local optionsList = options.Options or {"Option 1", "Option 2", "Option 3"}
+                local defaultValue = options.Default or optionsList[1]
+                local callback = options.Callback or function() end
+                local flag = options.Flag or dropdownName
+                local multi = options.Multi or false
+                
+                local dropdownFrame = Instance.new("Frame")
+                dropdownFrame.Name = dropdownName .. "Dropdown"
+                dropdownFrame.Size = dim2(1, 0, 0, 30)
+                dropdownFrame.BackgroundTransparency = 1
+                dropdownFrame.LayoutOrder = #self.Elements + 1
+                dropdownFrame.Parent = self.Content
+                
+                local dropdownLabel = Instance.new("TextLabel")
+                dropdownLabel.Name = "DropdownLabel"
+                dropdownLabel.Size = dim2(1, -100, 1, 0)
+                dropdownLabel.BackgroundTransparency = 1
+                dropdownLabel.Text = dropdownName
+                dropdownLabel.TextColor3 = BronxWare.Themes[config.Theme].Text
+                dropdownLabel.TextXAlignment = Enum.TextXAlignment.Left
+                dropdownLabel.Font = Enum.Font.Gotham
+                dropdownLabel.TextSize = 12
+                dropdownLabel.Parent = dropdownFrame
+                
+                local dropdownButton = Instance.new("TextButton")
+                dropdownButton.Name = "DropdownButton"
+                dropdownButton.Size = dim2(0, 90, 0, 25)
+                dropdownButton.Position = dim2(1, -95, 0.5, -12.5)
+                dropdownButton.BackgroundColor3 = BronxWare.Themes[config.Theme].Foreground
+                dropdownButton.BorderSizePixel = 0
+                dropdownButton.Text = defaultValue
+                dropdownButton.TextColor3 = BronxWare.Themes[config.Theme].Text
+                dropdownButton.Font = Enum.Font.Gotham
+                dropdownButton.TextSize = 11
+                dropdownButton.AutoButtonColor = false
+                dropdownButton.Parent = dropdownFrame
+                
+                local buttonCorner = Instance.new("UICorner")
+                buttonCorner.CornerRadius = UDim.new(0, 4)
+                buttonCorner.Parent = dropdownButton
+                
+                local dropdownList = Instance.new("Frame")
+                dropdownList.Name = "DropdownList"
+                dropdownList.Size = dim2(0, 90, 0, 0)
+                dropdownList.Position = dim2(1, -95, 0, 30)
+                dropdownList.BackgroundColor3 = BronxWare.Themes[config.Theme].Foreground
+                dropdownList.BorderSizePixel = 0
+                dropdownList.Visible = false
+                dropdownList.ClipsDescendants = true
+                dropdownList.Parent = dropdownFrame
+                
+                local listCorner = Instance.new("UICorner")
+                listCorner.CornerRadius = UDim.new(0, 4)
+                listCorner.Parent = dropdownList
+                
+                local listLayout = Instance.new("UIListLayout")
+                listLayout.Padding = UDim.new(0, 1)
+                listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                listLayout.Parent = dropdownList
+                
+                local selected = multi and {[defaultValue] = true} or defaultValue
+                window.Flags[flag] = selected
+                local isOpen = false
+                
+                local function updateDropdown()
+                    if multi then
+                        local selectedText = ""
+                        for option, isSelected in pairs(selected) do
+                            if isSelected then
+                                if selectedText == "" then
+                                    selectedText = option
+                                else
+                                    selectedText = selectedText .. ", " .. option
+                                end
+                            end
+                        end
+                        dropdownButton.Text = selectedText == "" and "None" or selectedText
+                    else
+                        dropdownButton.Text = tostring(selected)
+                    end
+                    callback(selected)
+                end
+                
+                local function createOption(option)
+                    local optionButton = Instance.new("TextButton")
+                    optionButton.Name = option .. "Option"
+                    optionButton.Size = dim2(1, -10, 0, 20)
+                    optionButton.Position = dim2(0, 5, 0, 0)
+                    optionButton.BackgroundColor3 = BronxWare.Themes[config.Theme].Background
+                    optionButton.BorderSizePixel = 0
+                    optionButton.Text = option
+                    optionButton.TextColor3 = BronxWare.Themes[config.Theme].Text
+                    optionButton.Font = Enum.Font.Gotham
+                    optionButton.TextSize = 10
+                    optionButton.AutoButtonColor = false
+                    optionButton.Parent = dropdownList
+                    
+                    local optionCorner = Instance.new("UICorner")
+                    optionCorner.CornerRadius = UDim.new(0, 3)
+                    optionCorner.Parent = optionButton
+                    
+                    optionButton.MouseButton1Click:Connect(function()
+                        if multi then
+                            selected[option] = not selected[option]
+                            optionButton.BackgroundColor3 = selected[option] and BronxWare.Themes[config.Theme].Accent or BronxWare.Themes[config.Theme].Background
+                        else
+                            selected = option
+                            isOpen = false
+                            dropdownList.Visible = false
+                            Services.TweenService:Create(dropdownList, TweenInfo.new(0.2), {Size = dim2(0, 90, 0, 0)}):Play()
+                            
+                            for _, child in ipairs(dropdownList:GetChildren()) do
+                                if child:IsA("TextButton") then
+                                    child.BackgroundColor3 = BronxWare.Themes[config.Theme].Background
+                                end
+                            end
+                            optionButton.BackgroundColor3 = BronxWare.Themes[config.Theme].Accent
+                        end
+                        window.Flags[flag] = selected
+                        updateDropdown()
+                    end)
+                    
+                    if (multi and selected[option]) or (not multi and selected == option) then
+                        optionButton.BackgroundColor3 = BronxWare.Themes[config.Theme].Accent
+                    end
+                    
+                    return optionButton
+                end
+                
+                for _, option in ipairs(optionsList) do
+                    createOption(option)
+                end
+                
+                dropdownList.Size = dim2(0, 90, 0, #optionsList * 21)
+                
+                dropdownButton.MouseButton1Click:Connect(function()
+                    isOpen = not isOpen
+                    dropdownList.Visible = isOpen
+                    
+                    if isOpen then
+                        Services.TweenService:Create(dropdownList, TweenInfo.new(0.2), {Size = dim2(0, 90, 0, #optionsList * 21)}):Play()
+                    else
+                        Services.TweenService:Create(dropdownList, TweenInfo.new(0.2), {Size = dim2(0, 90, 0, 0)}):Play()
+                    end
+                end)
+                
+                updateDropdown()
+                
+                table.insert(self.Elements, {
+                    Type = "Dropdown",
+                    Name = dropdownName,
+                    Element = dropdownButton,
+                    Selected = selected,
+                    Update = function(newSelection)
+                        selected = newSelection
+                        window.Flags[flag] = selected
+                        updateDropdown()
+                    end
+                })
+                
+                return {
+                    Set = function(newSelection)
+                        selected = newSelection
+                        window.Flags[flag] = selected
+                        updateDropdown()
+                    end,
+                    Get = function()
+                        return selected
+                    end
+                }
+            end
+            
+            function section:AddLabel(options)
+                local labelName = options.Name or "Label"
+                local labelText = options.Text or "Label Text"
+                
+                local labelFrame = Instance.new("Frame")
+                labelFrame.Name = labelName .. "Label"
+                labelFrame.Size = dim2(1, 0, 0, 20)
+                labelFrame.BackgroundTransparency = 1
+                labelFrame.LayoutOrder = #self.Elements + 1
+                labelFrame.Parent = self.Content
+                
+                local label = Instance.new("TextLabel")
+                label.Name = "Label"
+                label.Size = dim2(1, 0, 1, 0)
+                label.BackgroundTransparency = 1
+                label.Text = labelText
+                label.TextColor3 = BronxWare.Themes[config.Theme].Text
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.Font = Enum.Font.Gotham
+                label.TextSize = 12
+                label.Parent = labelFrame
+                
+                table.insert(self.Elements, {
+                    Type = "Label",
+                    Name = labelName,
+                    Element = label,
+                    Update = function(newText)
+                        label.Text = newText
+                    end
+                })
+                
+                return {
+                    Set = function(newText)
+                        label.Text = newText
+                    end
+                }
+            end
+            
+            return section
         end
-    end)
-    
-    updateSlider(slider.Value)
-    
-    function slider:SetValue(value)
-        slider.Value = math.clamp(value, slider.Min, slider.Max)
-        updateSlider(slider.Value)
+        
+        return tab
     end
     
-    if props.Parent then
-        container.Parent = props.Parent
-    end
-    
-    slider.Container = container
-    return slider
-end
-
--- Tab System
-function NexusUI:Tab(title)
-    local tab = {}
-    
-    local button = self:Create("TextButton", {
-        Size = UDim2.new(0, 100, 0, 30),
-        BackgroundColor3 = self.Colors.Secondary,
-        BackgroundTransparency = 0.2,
-        Text = title,
-        TextColor3 = self.Colors.Text,
-        Font = Enum.Font.Gotham,
-        TextSize = 14,
-        AutoButtonColor = false,
-        BorderSizePixel = 0
-    })
-    
-    self:RoundedCorners(6).Parent = button
-    
-    local contentFrame = self:Create("Frame", {
-        Size = UDim2.new(1, 0, 1, -40),
-        Position = UDim2.new(0, 0, 0, 40),
-        BackgroundTransparency = 1,
-        Visible = false
-    })
-    
-    function tab:Show()
-        contentFrame.Visible = true
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = self.Colors.Accent}):Play()
-    end
-    
-    function tab:Hide()
-        contentFrame.Visible = false
-        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = self.Colors.Secondary}):Play()
-    end
-    
-    button.MouseButton1Click:Connect(function()
-        if tab.OnClick then
-            tab.OnClick()
+    -- Select tab method
+    function window:SelectTab(tab)
+        if self.CurrentTab then
+            self.CurrentTab.Content.Visible = false
         end
-    end)
-    
-    tab.Button = button
-    tab.Content = contentFrame
-    
-    return tab
-end
-
-return NexusUI
+        
+        for _, otherTab in ipairs(self.Tabs) do
+            otherTab.Button.BackgroundColor3 = BronxWare.Themes[config.Theme].Background
+        end
+        
+        tab.Content.Visible = true
+        tab
