@@ -30,13 +30,13 @@
 
     local themes = {
         preset = {
-            accent = rgb(200, 162, 200),
+            accent = rgb(255, 0, 1),
             window_outline = rgb(0, 0, 0),
             inline = rgb(25, 27, 27),
             background = rgb(17, 19, 19),
             visible_backgrounds = rgb(20, 23, 22),
             text_color = rgb(221, 223, 222),
-            glow = rgb(200, 162, 200),  -- Lilac purple
+            glow = rgb(255, 0, 0),  -- Pure red
             deselected = rgb(89, 91, 91),
         },
         utility = {},
@@ -837,7 +837,7 @@
                     Library:Create( "UIGradient" , {
                         Rotation = 90;
                         Parent = Items.hue_drag;
-                        Color = rgbseq{rgbkey(0, rgb(200, 162, 200)), rgbkey(0.17, rgb(255, 255, 0)), rgbkey(0.33, rgb(0, 255, 0)), rgbkey(0.5, rgb(0, 255, 255)), rgbkey(0.67, rgb(0, 0, 255)), rgbkey(0.83, rgb(255, 0, 255)), rgbkey(1, rgb(200, 162, 200))}
+                        Color = rgbseq{rgbkey(0, rgb(255, 0, 0)), rgbkey(0.17, rgb(255, 255, 0)), rgbkey(0.33, rgb(0, 255, 0)), rgbkey(0.5, rgb(0, 255, 255)), rgbkey(0.67, rgb(0, 0, 255)), rgbkey(0.83, rgb(255, 0, 255)), rgbkey(1, rgb(255, 0, 0))}
                     });
                     
                     Items.HuePicker = Library:Create( "Frame" , {
@@ -1352,7 +1352,7 @@
                 }); Library:Themify(Items.Fade, "background", "BackgroundColor3")
 
                 Items.Glow = Library:Create("ImageLabel", {
-                    ImageColor3 = rgb(200, 162, 200);
+                    ImageColor3 = rgb(255, 0, 0);
                     ScaleType = Enum.ScaleType.Slice;
                     ImageTransparency = 0.6499999761581421;
                     BorderColor3 = rgb(0, 0, 0);
@@ -1455,77 +1455,16 @@
                 end)
             end 
 
-             function Cfg.ChangeMenuTitle(text)
+            function Cfg.ChangeMenuTitle(text)
                 Items.UITitle.Text = text
             end
 
             function Cfg.ToggleKeybindList(bool)
-    -- Create the keybind list frame if it doesn't exist
-    if not Cfg.Items.Keybind_List then
-        Cfg.Items.Keybind_List = Library:Create("Frame", {
-            Parent = Library.Items;  -- Parent to the main ScreenGui
-            Name = "KeybindList";
-            Position = dim2(0, 10, 0.5, -100);
-            Size = dim2(0, 200, 0, 200);
-            BackgroundColor3 = themes.preset.inline;
-            BorderSizePixel = 0;
-            Visible = bool;
-        })
-        
-        -- Add styling
-        Library:Create("UICorner", {
-            Parent = Cfg.Items.Keybind_List;
-            CornerRadius = dim(0, 4)
-        })
-        
-        local Inline = Library:Create("Frame", {
-            Parent = Cfg.Items.Keybind_List;
-            Name = "Inline";
-            Position = dim2(0, 1, 0, 1);
-            Size = dim2(1, -2, 1, -2);
-            BorderSizePixel = 0;
-            BackgroundColor3 = themes.preset.background
-        })
-        
-        Library:Create("UICorner", {
-            Parent = Inline;
-            CornerRadius = dim(0, 4)
-        })
-        
-        local Title = Library:Create("TextLabel", {
-            Parent = Inline;
-            Text = "Keybinds";
-            FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold);
-            TextSize = 16;
-            TextColor3 = themes.preset.accent;
-            BackgroundTransparency = 1;
-            Position = dim2(0, 10, 0, 10);
-            Size = dim2(1, -20, 0, 20);
-        })
-        
-        Cfg.Items.Keybind_List.Content = Library:Create("ScrollingFrame", {
-            Parent = Inline;
-            Position = dim2(0, 10, 0, 40);
-            Size = dim2(1, -20, 1, -50);
-            CanvasSize = dim2(0, 0, 0, 0);
-            BackgroundTransparency = 1;
-            ScrollBarThickness = 3;
-            BorderSizePixel = 0;
-            AutomaticCanvasSize = Enum.AutomaticSize.Y;
-        })
-        
-        Library:Create("UIListLayout", {
-            Parent = Cfg.Items.Keybind_List.Content;
-            SortOrder = Enum.SortOrder.LayoutOrder;
-            Padding = dim(0, 5)
-        })
-    else
-        Cfg.Items.Keybind_List.Visible = bool
-    end
-end
+                Items.Keybind_List.Visible = bool
+            end
             
             return setmetatable(Cfg, Library)
-        end  
+        end 
 
         function Library:Tab(properties)
             local Cfg = {
@@ -2671,58 +2610,6 @@ Items.Input = Library:Create("TextBox", {
                 Items = {}
             }
 
-   -- Add to keybind list when created
-task.spawn(function()
-    -- Wait a bit for the window to be fully created
-    task.wait(0.5)
-    
-    -- Find the keybind list in the main ScreenGui
-    local keybindList = nil
-    for _, v in pairs(Library.Items:GetChildren()) do
-        if v.Name == "KeybindList" then
-            keybindList = v
-            break
-        end
-    end
-    
-    if keybindList and keybindList.Content then
-        local KeybindEntry = Library:Create("Frame", {
-            Parent = keybindList.Content;
-            Name = Cfg.Flag .. "_entry";
-            Size = dim2(1, -10, 0, 25);
-            BackgroundTransparency = 1;
-            BorderSizePixel = 0;
-        })
-        
-        local KeyName = Library:Create("TextLabel", {
-            Parent = KeybindEntry;
-            Text = Cfg.Name or Cfg.Flag;
-            FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium);
-            TextSize = 13;
-            TextColor3 = themes.preset.text_color;
-            BackgroundTransparency = 1;
-            Position = dim2(0, 5, 0, 0);
-            Size = dim2(0.6, -5, 1, 0);
-            TextXAlignment = Enum.TextXAlignment.Left;
-        })
-        
-        local KeyValue = Library:Create("TextLabel", {
-            Parent = KeybindEntry;
-            Text = "NONE";
-            FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold);
-            TextSize = 13;
-            TextColor3 = themes.preset.accent;
-            BackgroundTransparency = 1;
-            Position = dim2(0.6, 0, 0, 0);
-            Size = dim2(0.4, -5, 1, 0);
-            TextXAlignment = Enum.TextXAlignment.Right;
-        })
-        
-        -- Store reference to update later
-        Cfg.ListEntry = KeyValue
-    end
-end)
-
             Flags[Cfg.Flag] = {
                 Mode = Cfg.Mode,
                 mode = Cfg.Mode,
@@ -2889,11 +2776,6 @@ end)
                 local __text = text and tostring(text):gsub("KeyCode.", ""):gsub("UserInputType.", "")
 
                 Items.Key.Text = " " .. __text .. " "
-                
-                -- ADD THIS: Update the keybind list entry
-                if Cfg.ListEntry then
-                    Cfg.ListEntry.Text = __text or "NONE"
-                end
 
                 if Items.Keybinds then
                     Items.Keybinds.TextTransparency = 1
@@ -3061,52 +2943,41 @@ end)
         end
 
         function Library:Configs(window) 
-    local Text;
-    local Tab = window:Tab({
-        name = "Settings",
-        icon = "http://www.roblox.com/asset/?id=6031280882"
-    })
+            local Text;
+            local Tab = window:Tab({
+                name = "Settings",
+                icon = "http://www.roblox.com/asset/?id=6031280882"
+            })
 
-    local Section = Tab:Section({Name = "Main", Side = "Left"})
-    ConfigHolder = Section:Dropdown({Name = "Configs", Options = {"Report", "This", "Error", "To", "Finobe"}, Callback = function(option) if Text then Text.Set(option) end end, Flag = "config_Name_list"}); Library:UpdateConfigList()
-    Section:Textbox({Name = "Config Name:", Flag = "config_Name_text", default = ""})
-    Section:Button({Name = "Save", Callback = function() if Flags["config_Name_text"] == "" then return end writefile(Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg", Library:GetConfig()) Library:UpdateConfigList() Notifications:Create({Name = "Saved Config (" ..  Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg" .. ")"}) end})
-    Section:Button({Name = "Load", Callback = function() if Flags["config_Name_text"] == "" then return end Library:LoadConfig(readfile(Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg")) Library:UpdateConfigList() Notifications:Create({Name = "Loaded Config (" ..  Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg" .. ")"}) end})
-    Section:Button({Name = "Delete", Callback = function() if Flags["config_Name_text"] == "" then return end delfile(Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg") Library:UpdateConfigList() Notifications:Create({Name = "Deleted Config (" ..  Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg" .. ")"}) end})
+            local Section = Tab:Section({Name = "Main", Side = "Left"})
+            ConfigHolder = Section:Dropdown({Name = "Configs", Options = {"Report", "This", "Error", "To", "Finobe"}, Callback = function(option) if Text then Text.Set(option) end end, Flag = "config_Name_list"}); Library:UpdateConfigList()
+            Section:Textbox({Name = "Config Name:", Flag = "config_Name_text", default = ""})
+            Section:Button({Name = "Save", Callback = function() if Flags["config_Name_text"] == "" then return end writefile(Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg", Library:GetConfig()) Library:UpdateConfigList() Notifications:Create({Name = "Saved Config (" ..  Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg" .. ")"}) end})
+            Section:Button({Name = "Load", Callback = function() if Flags["config_Name_text"] == "" then return end Library:LoadConfig(readfile(Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg")) Library:UpdateConfigList() Notifications:Create({Name = "Loaded Config (" ..  Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg" .. ")"}) end})
+            Section:Button({Name = "Delete", Callback = function() if Flags["config_Name_text"] == "" then return end delfile(Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg") Library:UpdateConfigList() Notifications:Create({Name = "Deleted Config (" ..  Library.Directory .. "/configs/" .. Flags["config_Name_text"] .. ".cfg" .. ")"}) end})
 
-    local Section = Tab:Section({Name = "Other", Side = "Right"})
-    Section:Label({Name = "Accent Color"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("accent", color) end, Color = themes.preset.accent})
-    Section:Label({Name = "Window Outline"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("window_outline", color) end, Color = themes.preset.window_outline})
-    Section:Label({Name = "Inline Elements"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("inline", color) end, Color = themes.preset.inline})
-    Section:Label({Name = "Main Background"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("background", color) end, Color = themes.preset.background})
-    Section:Label({Name = "Visible Backgrounds"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("visible_backgrounds", color) end, Color = themes.preset.visible_backgrounds})
-    Section:Label({Name = "Text Color"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("text_color", color) end, Color = themes.preset.text_color})
-    Section:Label({Name = "Glow Effect"}):Colorpicker({Callback = function(color, alpha)Library:RefreshTheme("glow", color)end,Color = themes.preset.glow})
-    Section:Label({Name = "Deselected Elements"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("deselected", color) end, Color = themes.preset.deselected})
-    
-    -- ADDED: Show Keybind List Toggle
-    Section:Toggle({
-        Name = "Show Keybind List", 
-        Flag = "show_keybind_list",
-        Default = true,
-        Callback = function(bool)
-            if window and window.ToggleKeybindList then
-                window:ToggleKeybindList(bool)
-            end
+            local Section = Tab:Section({Name = "Other", Side = "Right"})
+            Section:Label({Name = "Accent Color"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("accent", color) end, Color = themes.preset.accent})
+            Section:Label({Name = "Window Outline"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("window_outline", color) end, Color = themes.preset.window_outline})
+            Section:Label({Name = "Inline Elements"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("inline", color) end, Color = themes.preset.inline})
+            Section:Label({Name = "Main Background"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("background", color) end, Color = themes.preset.background})
+            Section:Label({Name = "Visible Backgrounds"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("visible_backgrounds", color) end, Color = themes.preset.visible_backgrounds})
+            Section:Label({Name = "Text Color"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("text_color", color) end, Color = themes.preset.text_color})
+            Section:Label({Name = "Glow Effect"}):Colorpicker({Callback = function(color, alpha)Library:RefreshTheme("glow", color)end,Color = themes.preset.glow})
+            Section:Label({Name = "Deselected Elements"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("deselected", color) end, Color = themes.preset.deselected})
+
+            window.Tweening = true
+            Section:Label({Name = "Menu Bind"}):Keybind({Name = "Menu Bind", Callback = function(bool) 
+                if window.Tweening then
+                    return 
+                end 
+
+                window.ToggleMenu(bool) 
+            end, Default = true})
+
+            delay(2, function() window.Tweening = false end)
         end
-    })
-
-    window.Tweening = true
-    Section:Label({Name = "Menu Bind"}):Keybind({Name = "Menu Bind", Callback = function(bool) 
-        if window.Tweening then
-            return 
-        end 
-
-        window.ToggleMenu(bool) 
-    end, Default = true})
-
-    delay(2, function() window.Tweening = false end)
-end
+    --
 
     -- Notification Library
         function Notifications:RefreshNotifications() 
