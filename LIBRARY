@@ -36,7 +36,7 @@
             background = rgb(17, 19, 19),
             visible_backgrounds = rgb(20, 23, 22),
             text_color = rgb(221, 223, 222),
-            glow = rgb((200, 162, 200)),  -- Pure red
+            glow = rgb(200, 162, 200),  -- Pure red
             deselected = rgb(89, 91, 91),
         },
         utility = {},
@@ -837,7 +837,7 @@
                     Library:Create( "UIGradient" , {
                         Rotation = 90;
                         Parent = Items.hue_drag;
-                        Color = rgbseq{rgbkey(0, rgb((200, 162, 200))), rgbkey(0.17, rgb(255, 255, 0)), rgbkey(0.33, rgb(0, 255, 0)), rgbkey(0.5, rgb(0, 255, 255)), rgbkey(0.67, rgb(0, 0, 255)), rgbkey(0.83, rgb(255, 0, 255)), rgbkey(1, rgb((200, 162, 200)))}
+                        Color = rgbseq{rgbkey(0, rgb(200, 162, 200)), rgbkey(0.17, rgb(255, 255, 0)), rgbkey(0.33, rgb(0, 255, 0)), rgbkey(0.5, rgb(0, 255, 255)), rgbkey(0.67, rgb(0, 0, 255)), rgbkey(0.83, rgb(255, 0, 255)), rgbkey(1, rgb(200, 162, 200))}
                     });
                     
                     Items.HuePicker = Library:Create( "Frame" , {
@@ -1352,7 +1352,7 @@
                 }); Library:Themify(Items.Fade, "background", "BackgroundColor3")
 
                 Items.Glow = Library:Create("ImageLabel", {
-                    ImageColor3 = rgb((200, 162, 200));
+                    ImageColor3 = rgb(200, 162, 200);
                     ScaleType = Enum.ScaleType.Slice;
                     ImageTransparency = 0.6499999761581421;
                     BorderColor3 = rgb(0, 0, 0);
@@ -2965,7 +2965,6 @@ Items.Input = Library:Create("TextBox", {
             Section:Label({Name = "Text Color"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("text_color", color) end, Color = themes.preset.text_color})
             Section:Label({Name = "Glow Effect"}):Colorpicker({Callback = function(color, alpha)Library:RefreshTheme("glow", color)end,Color = themes.preset.glow})
             Section:Label({Name = "Deselected Elements"}):Colorpicker({Callback = function(color, alpha) Library:RefreshTheme("deselected", color) end, Color = themes.preset.deselected})
-            
 
             window.Tweening = true
             Section:Label({Name = "Menu Bind"}):Keybind({Name = "Menu Bind", Callback = function(bool) 
