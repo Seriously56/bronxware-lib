@@ -2671,6 +2671,58 @@ Items.Input = Library:Create("TextBox", {
                 Items = {}
             }
 
+    -- Add to keybind list when created
+    task.spawn(function()
+        -- Wait a bit for the window to be fully created
+        task.wait(0.5)
+        
+        -- Find the window's keybind list
+        local window = nil
+        for _, v in pairs(getgenv().Library.Items:GetChildren()) do
+            if v.Name == "KeybindList" then
+                window = v
+                break
+            end
+        end
+        
+        if window and window.Content then
+            local KeybindEntry = Library:Create("Frame", {
+                Parent = window.Content;
+                Name = Cfg.Flag .. "_entry";
+                Size = dim2(1, -10, 0, 25);
+                BackgroundTransparency = 1;
+                BorderSizePixel = 0;
+            })
+            
+            local KeyName = Library:Create("TextLabel", {
+                Parent = KeybindEntry;
+                Text = Cfg.Name or Cfg.Flag;
+                FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium);
+                TextSize = 13;
+                TextColor3 = themes.preset.text_color;
+                BackgroundTransparency = 1;
+                Position = dim2(0, 5, 0, 0);
+                Size = dim2(0.6, -5, 1, 0);
+                TextXAlignment = Enum.TextXAlignment.Left;
+            })
+            
+            local KeyValue = Library:Create("TextLabel", {
+                Parent = KeybindEntry;
+                Text = "NONE";
+                FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold);
+                TextSize = 13;
+                TextColor3 = themes.preset.accent;
+                BackgroundTransparency = 1;
+                Position = dim2(0.6, 0, 0, 0);
+                Size = dim2(0.4, -5, 1, 0);
+                TextXAlignment = Enum.TextXAlignment.Right;
+            })
+            
+            -- Store reference to update later
+            Cfg.ListEntry = KeyValue
+        end
+    end)
+
             Flags[Cfg.Flag] = {
                 Mode = Cfg.Mode,
                 mode = Cfg.Mode,
@@ -2837,6 +2889,11 @@ Items.Input = Library:Create("TextBox", {
                 local __text = text and tostring(text):gsub("KeyCode.", ""):gsub("UserInputType.", "")
 
                 Items.Key.Text = " " .. __text .. " "
+                
+                -- ADD THIS: Update the keybind list entry
+                if Cfg.ListEntry then
+                    Cfg.ListEntry.Text = __text or "NONE"
+                end
 
                 if Items.Keybinds then
                     Items.Keybinds.TextTransparency = 1
