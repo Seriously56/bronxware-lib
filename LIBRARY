@@ -30,7 +30,7 @@
 
     local themes = {
         preset = {
-            accent = rgb(255, 0, 1),
+            accent = rgb(200, 162, 200),
             window_outline = rgb(0, 0, 0),
             inline = rgb(25, 27, 27),
             background = rgb(17, 19, 19),
