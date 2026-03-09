@@ -1460,69 +1460,69 @@
             end
 
             function Cfg.ToggleKeybindList(bool)
-                -- Create the keybind list frame if it doesn't exist
-                if not Items.Keybind_List then
-                    Items.Keybind_List = Library:Create("Frame", {
-                        Parent = Library.Items;
-                        Name = "KeybindList";
-                        Position = dim2(0, 10, 0.5, -100);
-                        Size = dim2(0, 200, 0, 200);
-                        BackgroundColor3 = themes.preset.inline;
-                        BorderSizePixel = 0;
-                        Visible = bool;
-                    })
-                    
-                    -- Add styling
-                    Library:Create("UICorner", {
-                        Parent = Items.Keybind_List;
-                        CornerRadius = dim(0, 4)
-                    })
-                    
-                    local Inline = Library:Create("Frame", {
-                        Parent = Items.Keybind_List;
-                        Name = "Inline";
-                        Position = dim2(0, 1, 0, 1);
-                        Size = dim2(1, -2, 1, -2);
-                        BorderSizePixel = 0;
-                        BackgroundColor3 = themes.preset.background
-                    })
-                    
-                    Library:Create("UICorner", {
-                        Parent = Inline;
-                        CornerRadius = dim(0, 4)
-                    })
-                    
-                    local Title = Library:Create("TextLabel", {
-                        Parent = Inline;
-                        Text = "Keybinds";
-                        FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold);
-                        TextSize = 16;
-                        TextColor3 = themes.preset.accent;
-                        BackgroundTransparency = 1;
-                        Position = dim2(0, 10, 0, 10);
-                        Size = dim2(1, -20, 0, 20);
-                    })
-                    
-                    Items.Keybind_List.Content = Library:Create("ScrollingFrame", {
-                        Parent = Inline;
-                        Position = dim2(0, 10, 0, 40);
-                        Size = dim2(1, -20, 1, -50);
-                        CanvasSize = dim2(0, 0, 0, 0);
-                        BackgroundTransparency = 1;
-                        ScrollBarThickness = 3;
-                        BorderSizePixel = 0;
-                        AutomaticCanvasSize = Enum.AutomaticSize.Y;
-                    })
-                    
-                    Library:Create("UIListLayout", {
-                        Parent = Items.Keybind_List.Content;
-                        SortOrder = Enum.SortOrder.LayoutOrder;
-                        Padding = dim(0, 5)
-                    })
-                else
-                    Items.Keybind_List.Visible = bool
-                end
-            end
+    -- Create the keybind list frame if it doesn't exist
+    if not Cfg.Items.Keybind_List then
+        Cfg.Items.Keybind_List = Library:Create("Frame", {
+            Parent = Library.Items;  -- Parent to the main ScreenGui
+            Name = "KeybindList";
+            Position = dim2(0, 10, 0.5, -100);
+            Size = dim2(0, 200, 0, 200);
+            BackgroundColor3 = themes.preset.inline;
+            BorderSizePixel = 0;
+            Visible = bool;
+        })
+        
+        -- Add styling
+        Library:Create("UICorner", {
+            Parent = Cfg.Items.Keybind_List;
+            CornerRadius = dim(0, 4)
+        })
+        
+        local Inline = Library:Create("Frame", {
+            Parent = Cfg.Items.Keybind_List;
+            Name = "Inline";
+            Position = dim2(0, 1, 0, 1);
+            Size = dim2(1, -2, 1, -2);
+            BorderSizePixel = 0;
+            BackgroundColor3 = themes.preset.background
+        })
+        
+        Library:Create("UICorner", {
+            Parent = Inline;
+            CornerRadius = dim(0, 4)
+        })
+        
+        local Title = Library:Create("TextLabel", {
+            Parent = Inline;
+            Text = "Keybinds";
+            FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold);
+            TextSize = 16;
+            TextColor3 = themes.preset.accent;
+            BackgroundTransparency = 1;
+            Position = dim2(0, 10, 0, 10);
+            Size = dim2(1, -20, 0, 20);
+        })
+        
+        Cfg.Items.Keybind_List.Content = Library:Create("ScrollingFrame", {
+            Parent = Inline;
+            Position = dim2(0, 10, 0, 40);
+            Size = dim2(1, -20, 1, -50);
+            CanvasSize = dim2(0, 0, 0, 0);
+            BackgroundTransparency = 1;
+            ScrollBarThickness = 3;
+            BorderSizePixel = 0;
+            AutomaticCanvasSize = Enum.AutomaticSize.Y;
+        })
+        
+        Library:Create("UIListLayout", {
+            Parent = Cfg.Items.Keybind_List.Content;
+            SortOrder = Enum.SortOrder.LayoutOrder;
+            Padding = dim(0, 5)
+        })
+    else
+        Cfg.Items.Keybind_List.Visible = bool
+    end
+end
             
             return setmetatable(Cfg, Library)
         end  
@@ -2671,57 +2671,57 @@ Items.Input = Library:Create("TextBox", {
                 Items = {}
             }
 
-    -- Add to keybind list when created
-    task.spawn(function()
-        -- Wait a bit for the window to be fully created
-        task.wait(0.5)
-        
-        -- Find the window's keybind list
-        local window = nil
-        for _, v in pairs(getgenv().Library.Items:GetChildren()) do
-            if v.Name == "KeybindList" then
-                window = v
-                break
-            end
+   -- Add to keybind list when created
+task.spawn(function()
+    -- Wait a bit for the window to be fully created
+    task.wait(0.5)
+    
+    -- Find the keybind list in the main ScreenGui
+    local keybindList = nil
+    for _, v in pairs(Library.Items:GetChildren()) do
+        if v.Name == "KeybindList" then
+            keybindList = v
+            break
         end
+    end
+    
+    if keybindList and keybindList.Content then
+        local KeybindEntry = Library:Create("Frame", {
+            Parent = keybindList.Content;
+            Name = Cfg.Flag .. "_entry";
+            Size = dim2(1, -10, 0, 25);
+            BackgroundTransparency = 1;
+            BorderSizePixel = 0;
+        })
         
-        if window and window.Content then
-            local KeybindEntry = Library:Create("Frame", {
-                Parent = window.Content;
-                Name = Cfg.Flag .. "_entry";
-                Size = dim2(1, -10, 0, 25);
-                BackgroundTransparency = 1;
-                BorderSizePixel = 0;
-            })
-            
-            local KeyName = Library:Create("TextLabel", {
-                Parent = KeybindEntry;
-                Text = Cfg.Name or Cfg.Flag;
-                FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium);
-                TextSize = 13;
-                TextColor3 = themes.preset.text_color;
-                BackgroundTransparency = 1;
-                Position = dim2(0, 5, 0, 0);
-                Size = dim2(0.6, -5, 1, 0);
-                TextXAlignment = Enum.TextXAlignment.Left;
-            })
-            
-            local KeyValue = Library:Create("TextLabel", {
-                Parent = KeybindEntry;
-                Text = "NONE";
-                FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold);
-                TextSize = 13;
-                TextColor3 = themes.preset.accent;
-                BackgroundTransparency = 1;
-                Position = dim2(0.6, 0, 0, 0);
-                Size = dim2(0.4, -5, 1, 0);
-                TextXAlignment = Enum.TextXAlignment.Right;
-            })
-            
-            -- Store reference to update later
-            Cfg.ListEntry = KeyValue
-        end
-    end)
+        local KeyName = Library:Create("TextLabel", {
+            Parent = KeybindEntry;
+            Text = Cfg.Name or Cfg.Flag;
+            FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium);
+            TextSize = 13;
+            TextColor3 = themes.preset.text_color;
+            BackgroundTransparency = 1;
+            Position = dim2(0, 5, 0, 0);
+            Size = dim2(0.6, -5, 1, 0);
+            TextXAlignment = Enum.TextXAlignment.Left;
+        })
+        
+        local KeyValue = Library:Create("TextLabel", {
+            Parent = KeybindEntry;
+            Text = "NONE";
+            FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold);
+            TextSize = 13;
+            TextColor3 = themes.preset.accent;
+            BackgroundTransparency = 1;
+            Position = dim2(0.6, 0, 0, 0);
+            Size = dim2(0.4, -5, 1, 0);
+            TextXAlignment = Enum.TextXAlignment.Right;
+        })
+        
+        -- Store reference to update later
+        Cfg.ListEntry = KeyValue
+    end
+end)
 
             Flags[Cfg.Flag] = {
                 Mode = Cfg.Mode,
