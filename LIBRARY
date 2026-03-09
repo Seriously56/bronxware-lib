@@ -36,7 +36,7 @@
             background = rgb(17, 19, 19),
             visible_backgrounds = rgb(20, 23, 22),
             text_color = rgb(221, 223, 222),
-            glow = rgb(255, 0, 0),  -- Pure red
+            glow = rgb(200, 162, 200),  -- Lilac purple
             deselected = rgb(89, 91, 91),
         },
         utility = {},
