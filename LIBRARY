@@ -1352,7 +1352,7 @@
                 }); Library:Themify(Items.Fade, "background", "BackgroundColor3")
 
                 Items.Glow = Library:Create("ImageLabel", {
-                    ImageColor3 = rgb(255, 0, 0);
+                    ImageColor3 = rgb(200, 162, 200);
                     ScaleType = Enum.ScaleType.Slice;
                     ImageTransparency = 0.6499999761581421;
                     BorderColor3 = rgb(0, 0, 0);
